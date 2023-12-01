@@ -8,7 +8,6 @@ frame_size = 346.41
 
 eff_link = 44.95
 
-
 class BASE:
     def __init__(self, ball_size = ball_size, link_size=link_size, link_length=link_length, frame_size=frame_size):
         # Sphere objects
@@ -138,3 +137,36 @@ class RE:
         # self.re1.axis = vector(pos[0] , pos[1], pos[2]) -  self.re1.pos + vector(1,1,0)
         # self.re2.axis = vector(pos[0] , pos[1], pos[2]) -  self.re2.pos + vector(1,1,0)
         # self.re3.axis = vector(pos[0] , pos[1], pos[2]) -  self.re3.pos+ vector(1,1,0)
+
+class EFF:
+    def __init__(self, frame_size=frame_size):
+        self.sphere_object = sphere(pos=vector(0, 0, 0), radius=ball_size, color=color.blue)
+
+        self.frame1 = cylinder(
+            pos=vector(0, 0, 0),
+            axis=vector(0, 0, 0),
+            radius=link_size,
+            color=color.green
+        )
+        self.frame2 = cylinder(
+            pos=vector(0, 0, 0),
+            axis=vector(0, 0, 0),
+            radius=link_size,
+            color=color.green
+        )
+        self.frame3 = cylinder(
+            pos=vector(0, 0, 0),
+            axis=vector(0, 0, 0),
+            radius=link_size,
+            color=color.green
+        )
+
+    def update_positions(self, pos):
+        self.sphere_object.pos = vector(pos[0] , pos[1], pos[2])
+        self.frame1.pos = vector(pos[0] , pos[1], pos[2]) + vector(0, -eff_link, 0)
+        self.frame2.pos = vector(pos[0] , pos[1], pos[2]) + vector(eff_link * np.cos(np.radians(30)), eff_link * np.cos(np.radians(60)), 0)
+        self.frame3.pos = vector(pos[0] , pos[1], pos[2]) + vector(-eff_link * np.cos(np.radians(30)), eff_link * np.cos(np.radians(60)), 0)
+        # vector(pos[0] , pos[1], pos[2]) + vector(-eff_link * np.cos(np.radians(30)), eff_link * np.cos(np.radians(60)), 0)
+        self.frame1.axis = self.frame2.pos - self.frame1.pos
+        self.frame2.axis = self.frame3.pos - self.frame2.pos
+        self.frame3.axis = self.frame1.pos - self.frame3.pos

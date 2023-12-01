@@ -2,14 +2,14 @@ from vpython import *
 from time import *
 import math
 import delta_calculate
-from delta_graphic import RF,RE , BASE
+from delta_graphic import RF,RE,EFF , BASE
 import numpy as np
 
 
 base = BASE()
 rf = RF()
 re = RE()
-
+eff = EFF()
 scene_canvas = canvas.get_selected()
 scene_canvas.width = 1080  
 scene_canvas.height = 720 
@@ -43,7 +43,7 @@ while True:
     rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(angle1, angle2,angle3)
     rf.update_positions(rf1_pos,rf2_pos,rf3_pos)
     re.update_positions(rf1_pos,rf2_pos,rf3_pos,pos)
-
+    eff.update_positions(pos)
     angle1 += da1
     angle2 += da2
     angle3 += da3
