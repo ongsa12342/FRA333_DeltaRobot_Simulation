@@ -7,6 +7,7 @@ link_length = 200
 frame_size = 346.41
 
 eff_link = 44.95
+eff_link_size = 2
 
 class BASE:
     def __init__(self, ball_size = ball_size, link_size=link_size, link_length=link_length, frame_size=frame_size):
@@ -139,26 +140,26 @@ class RE:
         # self.re3.axis = vector(pos[0] , pos[1], pos[2]) -  self.re3.pos+ vector(1,1,0)
 
 class EFF:
-    def __init__(self, frame_size=frame_size):
-        self.sphere_object = sphere(pos=vector(0, 0, 0), radius=ball_size, color=color.blue)
-
+    def __init__(self, eff_link_size=eff_link_size):
+        self.sphere_object = sphere(pos=vector(0, 0, 0), radius=ball_size, color=color.red)
+        self.eff_link_size = eff_link_size
         self.frame1 = cylinder(
             pos=vector(0, 0, 0),
             axis=vector(0, 0, 0),
-            radius=link_size,
-            color=color.green
+            radius=eff_link_size,
+            color=color.blue
         )
         self.frame2 = cylinder(
             pos=vector(0, 0, 0),
             axis=vector(0, 0, 0),
-            radius=link_size,
-            color=color.green
+            radius=eff_link_size,
+            color=color.blue
         )
         self.frame3 = cylinder(
             pos=vector(0, 0, 0),
             axis=vector(0, 0, 0),
-            radius=link_size,
-            color=color.green
+            radius=eff_link_size,
+            color=color.blue
         )
 
     def update_positions(self, pos):
