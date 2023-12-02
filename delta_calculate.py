@@ -7,16 +7,8 @@ re = 800.0 #232.0
 rf = 235.0 #112.0
  
 def delta_calcForward(theta1, theta2, theta3, e = e, f = f  , re = re , rf = rf ):
-    #trigonometric constants
-    sqrt3 = np.sqrt(3)
-    pi = np.pi    #PI
-    sin120 = sqrt3/2.0   
-    cos120 = -0.5        
-    tan60 = sqrt3
-    sin30 = 0.5
-    tan30 = 1/sqrt3
 
-    t = (f-e)*tan30/2
+    t = (f-e)*np.tan(np.deg2rad(30))/2
     # t = 200
     #dtr = pi/180.0
 
@@ -24,26 +16,26 @@ def delta_calcForward(theta1, theta2, theta3, e = e, f = f  , re = re , rf = rf 
     theta2 = np.radians(theta2)
     theta3 = np.radians(theta3)
 
-    y1 = -(f*tan30/2 + rf*np.cos(theta1))
+    y1 = -(f*np.tan(np.deg2rad(30))/2 + rf*np.cos(theta1))
     z1 = -rf*np.sin(theta1)
 
-    y2 = (f*tan30/2 + rf*np.cos(theta2))*sin30
-    x2 = y2*tan60
+    y2 = (f*np.tan(np.deg2rad(30))/2 + rf*np.cos(theta2))*np.sin(np.deg2rad(30))
+    x2 = y2*np.tan(np.deg2rad(60))
     z2 = -rf*np.sin(theta2)
 
-    y3 = (f*tan30/2 + rf*np.cos(theta3))*sin30
-    x3 = -y3*tan60
+    y3 = (f*np.tan(np.deg2rad(30))/2 + rf*np.cos(theta3))*np.sin(np.deg2rad(30))
+    x3 = -y3*np.tan(np.deg2rad(60))
     z3 = -rf*np.sin(theta3)
 
     y1_e = -(t + rf*np.cos(theta1))
     z1_e = -rf*np.sin(theta1)
 
-    y2_e = (t + rf*np.cos(theta2))*sin30
-    x2_e = y2_e*tan60
+    y2_e = (t + rf*np.cos(theta2))*np.sin(np.deg2rad(30))
+    x2_e = y2_e*np.tan(np.deg2rad(60))
     z2_e = -rf*np.sin(theta2)
 
-    y3_e = (t + rf*np.cos(theta3))*sin30
-    x3_e = -y3_e*tan60
+    y3_e = (t + rf*np.cos(theta3))*np.sin(np.deg2rad(30))
+    x3_e = -y3_e*np.tan(np.deg2rad(60))
     z3_e = -rf*np.sin(theta3)
 
     dnm = (y2_e-y1_e)*x3_e-(y3_e-y1_e)*x2_e
@@ -74,3 +66,29 @@ def delta_calcForward(theta1, theta2, theta3, e = e, f = f  , re = re , rf = rf 
     y0 = (a2*z0 + b2)/dnm
     
     return [0, y1, z1], [x2, y2, z2], [x3, y3, z3] , [x0,y0,z0]
+
+def delta_calcAngleYZ(x0, y0, z0):
+    y1 = -0.5 * 0.57735 * f; # f/2 * tg 30
+    y0 -= 0.5 * 0.57735 * e;    # shift center to edge
+    # z = a + b*y
+    a = (x0*x0 + y0*y0 + z0*z0 +rf*rf - re*re - y1*y1)/(2*z0)
+    b = (y1-y0)/z0
+    # discriminant
+    d = -(a+b*y1)*(a+b*y1)+rf*(b*b*rf+rf); 
+    if (d < 0): return "non-existing point" # non-existing point
+    yj = (y1 - a*b - np.sqrt(d))/(b*b + 1) # choosing outer point
+    zj = a + b*yj
+    y_offset = 180.0 if yj > y1 else 0.0
+    theta = np.degrees(np.arctan2(-zj, (y1 - yj))) + y_offset
+    return theta
+
+#inverse kinematics: (x0, y0, z0) -> (theta1, theta2, theta3)
+#returned status: 0=OK, -1=non-existing position
+def delta_calcInverse(x0, y0, z0):
+     #theta1 = theta2 = theta3 = 0
+     if(delta_calcAngleYZ(x0, y0, z0) != "non-existing point"):
+          theta1 = delta_calcAngleYZ(x0, y0, z0)
+          theta2 = delta_calcAngleYZ(x0*np.cos(np.radians(120)) + y0*np.sin(np.radians(120)), y0*np.cos(np.radians(120))-x0*np.sin(np.radians(120)), z0)  #rotate coords to +120 deg
+          theta3 = delta_calcAngleYZ(x0*np.cos(np.radians(120)) - y0*np.sin(np.radians(120)), y0*np.cos(np.radians(120))+x0*np.sin(np.radians(120)), z0)  #rotate coords to -120 deg
+     else: return "non-existing point"
+     return theta1, theta2, theta3
