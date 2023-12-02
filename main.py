@@ -4,7 +4,7 @@ import math
 import delta_calculate
 from delta_graphic import RF,RE,EFF , BASE
 import numpy as np
-
+from time import sleep
 
 base = BASE()
 rf = RF()
@@ -19,16 +19,6 @@ scene_canvas.camera.pos = vector(200, -1100, -100)
 scene_canvas.camera.axis = vector(0, 1800, -550)
 
 
-# # Function to handle keyboard input for zooming
-# def zoom(event):
-#     if event.key == 'up':
-#         scene.fov *= 1.1  # Zoom in
-#     elif event.key == 'down':
-#         scene.fov /= 1.1  # Zoom out
-
-# # Bind the zoom function to the keyboard events
-# scene.bind('keydown', zoom)
-
 
 
 angle1 = 90
@@ -38,65 +28,46 @@ da1 = 1
 da2 = 1
 da3 = 1
 
-x_in = 0
-y_in = 0
-z_in = 0
-
-
-def on_input_x(w):
-    global x_in
-    x_in = float(w.text)  
-
-
-def on_input_y(w):
-    global y_in
-    y_in = float(w.text) 
-
-
-def on_input_z(w):
-    global z_in
-    z_in = float(w.text)  
-
-
-
+_,_,_,[x_in, y_in, z_in] = delta_calculate.delta_calcForward(0, 0, 0)
 
 
 wt = wtext(text='\n' )
 # Create winput widgets for x, y, and z
 wtext(text='\n' )
-in_x = winput(bind=on_input_x, prompt='x')
-in_y = winput(bind=on_input_y, prompt='y')
-in_z = winput(bind=on_input_z, prompt='z')
-# Input box for the number
-# input_box = winput(bind=None, prompt='Enter a number:', type='numeric', width=100, pos=scene.title_anchor)
+in_x = winput(bind= lambda: None, prompt='x')
+in_y = winput(bind= lambda: None, prompt='y')
+in_z = winput(bind= lambda: None, prompt='z')
+wtext(text='       ' )
+
+
+def button_get():
+    global x_in
+    global y_in
+    global z_in
+
+    if delta_calculate.delta_calcInverse(float(in_x.text), float(in_y.text),float(in_z.text)) == "non-existing point":
+        calc_button.background = color.red
+        
+    else:
+        calc_button.background = color.white
+        x_in = float(in_x.text)
+        y_in = float(in_y.text)
+        z_in = float(in_z.text)
+
+
+
+calc_button = button(bind=button_get,text="Calculate")
 
 
 
 
 while True:
     rate(60)
-    if angle1 > 120:
-        da1 = -da1
-    elif angle1 < -45:
-        da1 = -da1
-
-    
-    if angle2 > 120:
-        da2 = -da2
-    elif angle2 < -45:
-        da2 = -da2
-    
-    if angle3 > 120:
-        da3 = -da3
-    elif angle3 < -45:
-        da3 = -da3
-
-
-    rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(x_in, y_in,z_in)
+    theta1, theta2, theta3 = delta_calculate.delta_calcInverse(x_in, y_in,z_in)
+    rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(theta1, theta2, theta3)
     rf.update_positions(rf1_pos,rf2_pos,rf3_pos)
     re.update_positions(rf1_pos,rf2_pos,rf3_pos,pos)
     eff.update_positions(pos)
-
     
     wt.text = f'(x, y, z,) = ({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f})\n' 
     # print(x_in,y_in,z_in)
