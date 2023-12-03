@@ -22,7 +22,7 @@ scene_canvas.camera.axis = vector(0, 1800, -550)
 theta1 = 0
 theta2 = 0
 theta3 = 0
-
+q = delta_calculate.input2array(theta1, theta2, theta3)
 wtext(text='\n' )
 wt = wtext(text='\n' )
 # Create winput widgets for x, y, and z
@@ -31,28 +31,26 @@ wtext(text='\n Position Input :  ' )
 _,_,_,init_pos = delta_calculate.delta_calcForward(delta_calculate.input2array(0,0,0))
 
 def pos_get():
-    global theta1
-    global theta2
-    global theta3
+    global q
     x_in,  y_in ,  z_in = posBox.getText()
-
     if delta_calculate.delta_calcInverse(delta_calculate.input2array(x_in, y_in,z_in)) != "error":
         posBox.button.background = color.white
-        [[theta1], [theta2], [theta3]] = delta_calculate.delta_calcInverse(delta_calculate.input2array(x_in, y_in,z_in))
-        thetaBox.update_positions([[theta1], [theta2], [theta3]])
+        
+        q = delta_calculate.delta_calcInverse(delta_calculate.input2array(x_in, y_in,z_in))
+        thetaBox.update_positions(q)
     else:
         posBox.button.background = color.red
 
 
-posBox = INPUTBox(init_value = init_pos,boxbind=pos_get)
+posBox = INPUTBox(init_value = init_pos,buttonbind=pos_get)
 
 
 wtext(text='     ' )
 wtext(text='Destination Input    :  ' )
-con = 0
+con = False
 def con_get():
     global con
-    con = 1
+    con = not con
 
 desBox = INPUTBox(buttonbind=con_get)
 desBox.c.text = -900
@@ -67,11 +65,10 @@ wtext(text='\n\n Angle Input    :  ' )
 
 
 def theta_get():
-    global theta1
-    global theta2
-    global theta3
+    global q
 
     theta1, theta2, theta3 = thetaBox.getText()
+    q = delta_calculate.input2array(theta1, theta2, theta3)
     _,_,_, p = delta_calculate.delta_calcForward(delta_calculate.input2array(theta1, theta2, theta3))
     posBox.update_positions(p)
 
@@ -80,16 +77,16 @@ dt = 1/60
 Kp = 10
 Ki = 0
 sum_e = 0
-q = delta_calculate.input2array(theta1, theta2, theta3)
+
 while True:
     rate(60)
-
+    
     x_des , y_des ,z_des = desBox.getText()
     way.pos = vector(x_des , y_des ,z_des)
     des_pos = [[x_des] , [y_des] ,[z_des]]
     rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(q)
     
-    if con == 1:
+    if con == True:
         desBox.button.background = color.green
 
         theta2_np, theta3_np = delta_calculate.find_theta(pos)
@@ -104,10 +101,13 @@ while True:
         qd = np.dot(Jt_inv,np.dot(Jp,V_e))
 
         q = q + qd*dt
-        
+        thetaBox.update_positions(q)
+        posBox.update_positions(pos)
+
         if np.linalg.norm(error) < 0.001 :
-            con = 0
+            con = False
             desBox.button.background = color.white
+        
         
 
         
