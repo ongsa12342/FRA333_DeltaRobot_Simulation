@@ -11,7 +11,7 @@ f = 200*2*np.sqrt(3)   #346.41016151377545  #base #457.3
 re = 800.0 #232.0
 rf = 235.0 #112.0
 
-def delta_calcForward(q_forward, status, e = e, f = f  , re = re , rf = rf ):
+def delta_calcForward(q_forward, e = e, f = f  , re = re , rf = rf ):
 
     t = (f-e)*np.tan(np.deg2rad(30))/2
     # t = 200
@@ -64,7 +64,7 @@ def delta_calcForward(q_forward, status, e = e, f = f  , re = re , rf = rf ):
 
     #discriminant
     d = b*b - 4.0*a*c
-    if (d < 0): return pos1, pos2, pos3, pos0, status  #// non-existing point
+    if (d < 0): return pos1, pos2, pos3, pos0  #// non-existing point
 
     z0 = -0.5*(b+np.sqrt(d))/a
     x0 = (a1*z0 + b1)/dnm
@@ -75,7 +75,7 @@ def delta_calcForward(q_forward, status, e = e, f = f  , re = re , rf = rf ):
     pos2 = np.array([[x2, y2, z2]]).T.astype(float)
     pos3 = np.array([[x3, y3, z3]]).T.astype(float)
     
-    return pos1, pos2, pos3, pos0, status
+    return pos1, pos2, pos3, pos0
 
 
 
@@ -87,7 +87,7 @@ def delta_calcAngleYZ(x0, y0, z0):
     b = (y1-y0)/z0
     # discriminant
     d = -(a+b*y1)*(a+b*y1)+rf*(b*b*rf+rf)
-    if (d < 0): return -999.0 # non-existing point
+    if (d < 0): return "error" # non-existing point
     yj = (y1 - a*b - np.sqrt(d))/(b*b + 1) # choosing outer point
     zj = a + b*yj
     y_offset = 180.0 if yj > y1 else 0.0
@@ -100,11 +100,11 @@ def delta_calcAngleYZ(x0, y0, z0):
 #returned status: 0=OK, -1=non-existing position
 def delta_calcInverse(pos):
      q_inv = np.array([[0, 0, 0]]).T.astype(float)
-     if(delta_calcAngleYZ(pos[0][0], pos[1][0], pos[2][0]) != 0.0):
+     if(delta_calcAngleYZ(pos[0][0], pos[1][0], pos[2][0]) != "error"):
           q_inv[0][0] = delta_calcAngleYZ(pos[0][0], pos[1][0], pos[2][0])
           q_inv[1][0] = delta_calcAngleYZ(pos[0][0]*np.cos(np.deg2rad(120)) + pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))-pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0])  #rotate coords to +120 deg
           q_inv[2][0] = delta_calcAngleYZ(pos[0][0]*np.cos(np.deg2rad(120)) - pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))+pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0])  #rotate coords to -120 deg
-     else: return -999.0
+     else: return "error"
 
      return q_inv
 
@@ -163,11 +163,18 @@ def Jacobian_pose(theta1, theta2, theta3):
     return Jl_v, Ja_v
 
 
+def input2array(theta1,theta2,theta3):
+    return np.array([[theta1,theta2,theta3]]).T
 
-q = np.array([[90, 90, 90]]).T
+def array2theta(theta):
+    return theta.T
 
-rf1_pos,rf2_pos,rf3_pos,end_pos = delta_calcForward(q)
-print(end_pos)
-q = delta_calcInverse(end_pos)
+# q = input2array(90,90,90)
 
-print(q)
+
+# rf1_pos,rf2_pos,rf3_pos,end_pos = delta_calcForward(q)
+# #endpos = [ 0.00000000e+00,-3.12843496e-14,-1.01983087e+03]
+# print(array2theta(end_pos))
+# q = delta_calcInverse(end_pos)
+
+# print(q)

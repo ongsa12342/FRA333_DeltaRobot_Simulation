@@ -171,3 +171,21 @@ class EFF:
         self.frame1.axis = self.frame2.pos - self.frame1.pos
         self.frame2.axis = self.frame3.pos - self.frame2.pos
         self.frame3.axis = self.frame1.pos - self.frame3.pos
+
+class INPUTBox:
+    def __init__(self , init_value = [[0],[0],[0]], boxbind = lambda: None, buttonbind = lambda: None):
+        self.a = winput(bind= boxbind, prompt='x',text=f'{init_value[0][0]:.2f}')
+        self.b = winput(bind= boxbind, prompt='y',text=f'{init_value[1][0]:.2f}')
+        self.c = winput(bind= boxbind, prompt='z',text=f'{init_value[2][0]:.2f}')
+        wtext(text='       ' )
+
+        self.button = button(bind=buttonbind,text="Enter")
+        
+
+    def update_positions(self,pos):
+        self.a.text = f'{pos[0][0]:.2f}'
+        self.b.text = f'{pos[1][0]:.2f}'
+        self.c.text = f'{pos[2][0]:.2f}'
+
+    def getText(self):
+        return float(self.a.text), float(self.b.text), float(self.c.text)
