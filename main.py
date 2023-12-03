@@ -87,8 +87,8 @@ while True:
     rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(q)
     
     if con == True:
-        desBox.button.background = color.green
-
+        desBox.button.background = color.red
+        desBox.button.text = "Stop!"
         theta2_np, theta3_np = delta_calculate.find_theta(pos)
 
         error = des_pos - pos
@@ -106,8 +106,11 @@ while True:
 
         if np.linalg.norm(error) < 0.001 :
             con = False
-            desBox.button.background = color.white
-        
+            
+    else:
+        desBox.button.background = color.white
+        desBox.button.text = "Enter"
+
         
 
         
