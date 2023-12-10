@@ -11,10 +11,10 @@ def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, dt,
         raise ValueError("current_time must be non-negative.")
 
     # Calculated Distance
-    s = abs(target_posJ - initial_posJ)
-    # Define Direction
-    direction = np.sign(target_posJ - initial_posJ)
-
+    s = target_posJ - initial_posJ
+    direction = np.sign(s)
+    s = abs(s)
+    
     # Define pattern of trapezoidal_trajectory
     if s > (max_veloJ ** 2) / max_accelJ:
         # Calculate the time required for acceleration and deceleration
@@ -36,11 +36,11 @@ def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, dt,
         acceleration = max_accelJ * direction
     elif current_time < time_total - time_accel:
         # Constant velocity phase
-        velocity = max_veloJ
+        velocity = max_veloJ * direction
         position = (
-                initial_posJ
-                + 0.5 * direction * max_accelJ * time_accel ** 2
-                + max_veloJ * (current_time - time_accel)
+                initial_posJ +
+                direction *( 0.5  * max_accelJ * time_accel ** 2
+                + max_veloJ * (current_time - time_accel))
         )
         acceleration = 0
         # print(current_time, position, velocity, acceleration)
@@ -48,20 +48,20 @@ def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, dt,
         # Deceleration phase
         # print("Deceleration phase")
         decel_time = current_time - (time_total - time_accel)
-        velocity = max_veloJ - max_accelJ * direction * decel_time
+        velocity = direction*(max_veloJ - max_accelJ * decel_time)
         position = (
                 initial_posJ
-                + 0.5 * direction * max_accelJ * time_accel ** 2
+                + direction*(0.5  * max_accelJ * time_accel ** 2
                 + max_veloJ * (time_total - 2 * time_accel)
-                - 0.5 * direction * max_accelJ * decel_time ** 2
-                + max_veloJ * decel_time
+                - 0.5  * max_accelJ * decel_time ** 2
+                + max_veloJ * decel_time)
         )
         acceleration = -max_accelJ * direction
     if current_time >= end_time:
         position = target_posJ
         velocity = 0.0
         acceleration = 0.0
-
+    
     return current_time, position, velocity, acceleration
     
 
@@ -116,8 +116,8 @@ def calcTime(initial_posJ, target_posJ, max_veloJ, max_accelJ):
 
 
 # Calculate Velocity Max
-def calcVelocityConstraint(target_posJ, max_accelJ, time_max):
-    veloCompute = ((max_accelJ * time_max) - np.sqrt(((max_accelJ * time_max)**2 - 4 * target_posJ * max_accelJ)))/2
+def calcVelocityConstraint(initial_posJ,target_posJ, max_accelJ, time_max):
+    veloCompute = ((max_accelJ * time_max) - np.sqrt(((max_accelJ * time_max)**2 - 4 * np.abs(target_posJ-initial_posJ) * max_accelJ)))/2
     return veloCompute
 
 
@@ -130,12 +130,12 @@ def calcTimeMax(q,accel_max):
     time_max = max_time.max()
     return time_max
 
-def calcallVelocityConstraint(q,accel_max,time_max):
+def calcallVelocityConstraint(qi,qf,accel_max,time_max):
     # Calculate Velocity Max of q'1, q'2, q'3
     velo_Constraint = np.array([[0,0,0]]).T.astype(float)
-    velo_Constraint[0][0] = calcVelocityConstraint(q[0][0], accel_max, time_max)
-    velo_Constraint[1][0] = calcVelocityConstraint(q[1][0], accel_max, time_max)
-    velo_Constraint[2][0] = calcVelocityConstraint(q[2][0], accel_max, time_max)
+    velo_Constraint[0][0] = calcVelocityConstraint(qi[0],qf[0][0], accel_max, time_max)
+    velo_Constraint[1][0] = calcVelocityConstraint(qi[1],qf[1][0], accel_max, time_max)
+    velo_Constraint[2][0] = calcVelocityConstraint(qi[2],qf[2][0], accel_max, time_max)
     # print("Velocity Compute :\n",velo_Constraint)
     return velo_Constraint
 

@@ -110,7 +110,7 @@ def delta_calcInverse(pos):
 
 
 #input
-q = np.array([[90, 90, 90]]).T
+q = np.array([[-90, 90, 90]]).T
 
 dt = 0.01
 current_time = 0
@@ -129,7 +129,7 @@ time_array = []
 
 #compute 
 time_max = calcTimeMax(q,accel_max)
-velo_Constraint = calcallVelocityConstraint(q,accel_max,time_max)
+velo_Constraint = calcallVelocityConstraint(qi,q,accel_max,time_max)
 
 
 while True:
@@ -151,7 +151,7 @@ while True:
 
     # Update the time
     current_time = current_time + dt
-    time.sleep(dt)
+    # time.sleep(dt)
     if current_time > time_max+dt:
         break
 
