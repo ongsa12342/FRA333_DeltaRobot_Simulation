@@ -178,3 +178,55 @@ def array2theta(theta):
 # q = delta_calcInverse(end_pos)
 
 # print(q)
+
+
+#input
+# qff = np.array([[90, 90, 90]]).T
+
+# dt = 0.01
+# current_time = 0
+
+# accel_max = 50
+# qi = [0, 0, 0]
+# qf = qff.T[0]
+
+
+# #vis
+# pos1, pos2, pos3 = [], [], []
+# velo1, velo2, velo3 = [], [], []
+# accel1, accel2, accel3 = [], [], []
+# time_array = []
+
+
+# #compute 
+# time_max = calcTimeMax(qf,accel_max)
+# velo_Constraint = calcallVelocityConstraint(qf,accel_max,time_max)
+
+
+# while True:
+#     # print(current_time)
+#     #compute
+#     [[positionJ1],[positionJ2],[positionJ3]] , [[velocityJ1],[velocityJ2],[velocityJ3]] ,[[accelerationJ1],[accelerationJ2],[accelerationJ3]],[[current_time1],[current_time2],[current_time3]] = traject_gen(qi, qf, velo_Constraint, accel_max, dt, current_time, time_max)
+    
+#     #vis
+#     pos1.append(positionJ1)
+#     pos2.append(positionJ2)
+#     pos3.append(positionJ3)
+#     velo1.append(velocityJ1)
+#     velo2.append(velocityJ2)
+#     velo3.append(velocityJ3)
+#     accel1.append(accelerationJ1)
+#     accel2.append(accelerationJ2)
+#     accel3.append(accelerationJ3)
+#     time_array.append(current_time)    
+
+#     # Update the time
+#     current_time = current_time + dt
+#     if current_time > time_max+dt:
+#         break
+
+        
+# # Visualize the trajectory
+# visualize_trajectory(time_array, pos1, velo1, accel1)
+# visualize_trajectory(time_array, pos2, velo2, accel2)
+# visualize_trajectory(time_array, pos3, velo3, accel3)

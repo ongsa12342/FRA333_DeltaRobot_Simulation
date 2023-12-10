@@ -5,7 +5,7 @@ import delta_calculate
 from delta_graphic import RF,RE,EFF , BASE, INPUTBox
 import numpy as np
 from time import sleep
-
+from trajectoryNew import *
 base = BASE()
 rf = RF()
 re = RE()
@@ -48,6 +48,7 @@ posBox = INPUTBox(init_value = init_pos,buttonbind=pos_get)
 wtext(text='     ' )
 wtext(text='Destination Input    :  ' )
 con = False
+con_delay = False
 def con_get():
     global con
     con = not con
@@ -78,33 +79,58 @@ Kp = 10
 Ki = 0
 sum_e = 0
 
+
+
+
+#traj
+
+
+
+
 while True:
     rate(60)
     
     x_des , y_des ,z_des = desBox.getText()
     way.pos = vector(x_des , y_des ,z_des)
-    des_pos = [[x_des] , [y_des] ,[z_des]]
+    des_pos = np.array([[x_des] , [y_des] ,[z_des]])
     rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(q)
     
     if con == True:
+        if con_delay == False:
+            #input
+
+            dt = 1/60
+            current_time = 0
+
+            accel_max = 50
+            qi = q.T[0]
+            qf = des_pos.T[0]
+
+            #compute 
+            time_max = calcTimeMax(des_pos,accel_max)
+            velo_Constraint = calcallVelocityConstraint(des_pos,accel_max,time_max)
+            
         desBox.button.background = color.red
         desBox.button.text = "Stop!"
         theta2_np, theta3_np = delta_calculate.find_theta(pos)
 
-        error = des_pos - pos
-        sum_e = sum_e + error
-        V_e = Kp*error #+ Ki*sum_e*dt
+        # error = des_pos - pos
+        # sum_e = sum_e + error
+        # V_e = Kp*error #+ Ki*sum_e*dt
 
-        Jp, Jt = delta_calculate.Jacobian_pose(q,theta2_np,theta3_np)
-        Jt_inv = np.linalg.inv(Jt)
+        # Jp, Jt = delta_calculate.Jacobian_pose(q,theta2_np,theta3_np)
+        # Jt_inv = np.linalg.inv(Jt)
 
-        qd = np.dot(Jt_inv,np.dot(Jp,V_e))
+        # qd = np.dot(Jt_inv,np.dot(Jp,V_e))
 
-        q = q + qd*dt
+        # q = q + qd*dt
+        
+        q, v_prime, a_prime, _ = traject_gen(qi, qf, velo_Constraint, accel_max, dt, current_time, time_max)
+        current_time = current_time + dt
         thetaBox.update_positions(q)
         posBox.update_positions(pos)
 
-        if np.linalg.norm(error) < 0.001 :
+        if  current_time > time_max+dt:
             con = False
             
     else:
@@ -112,7 +138,7 @@ while True:
         desBox.button.text = "Enter"
 
         
-
+    con_delay = con
         
 
     rf.update_positions(rf1_pos.reshape(3,),rf2_pos.reshape(3,),rf3_pos.reshape(3,))

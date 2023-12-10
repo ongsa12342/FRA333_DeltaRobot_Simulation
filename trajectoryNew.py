@@ -146,8 +146,9 @@ def traject_gen(qi, qf, velo_Constraint, accel_max, dt, current_time, time_max):
     current_time2, positionJ2, velocityJ2, accelerationJ2 = trajectory_trapezoidal(qi[1], qf[1], velo_Constraint[1][0], accel_max, dt, current_time, time_max)
     current_time3, positionJ3, velocityJ3, accelerationJ3 = trajectory_trapezoidal(qi[2], qf[2], velo_Constraint[2][0], accel_max, dt, current_time, time_max)
 
-    q_prime = [[positionJ1],[positionJ2],[positionJ3]]
-    v_prime = [[velocityJ1],[velocityJ2],[velocityJ3]]
-    a_prime = [[accelerationJ1],[accelerationJ2],[accelerationJ3]]
+    q_prime = np.array([[positionJ1],[positionJ2],[positionJ3]])
+    v_prime = np.array([[velocityJ1],[velocityJ2],[velocityJ3]])
+    a_prime = np.array([[accelerationJ1],[accelerationJ2],[accelerationJ3]])
     current_time = [[current_time1],[current_time2],[current_time3]]
     return q_prime, v_prime, a_prime, current_time
+
