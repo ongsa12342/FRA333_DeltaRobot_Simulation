@@ -80,6 +80,7 @@ def delta_calcForward(q_forward, e = e, f = f  , re = re , rf = rf ):
 
 
 def delta_calcAngleYZ(x0, y0, z0):
+    if z0 == 0: return "error"
     y1 = -0.5 * 0.57735 * f # f/2 * tg 30
     y0 -= 0.5 * 0.57735 * e    # shift center to edge
     # z = a + b*y
@@ -90,8 +91,7 @@ def delta_calcAngleYZ(x0, y0, z0):
     if (d < 0): return "error" # non-existing point
     yj = (y1 - a*b - np.sqrt(d))/(b*b + 1) # choosing outer point
     zj = a + b*yj
-    y_offset = 180.0 if yj > y1 else 0.0
-    theta = np.degrees(np.arctan2(-zj, (y1 - yj))) + y_offset
+    theta = np.rad2deg(np.arctan2(-zj, (y1 - yj)))
     return theta
 
 #inverse kinematics: (x0, y0, z0) -> (q_forward[0][0][0][0], q_forward[1][0], q_forward[2][0])
@@ -101,24 +101,31 @@ def delta_calcAngleYZ(x0, y0, z0):
 def delta_calcInverse(pos):
      q_inv = np.array([[0, 0, 0]]).T.astype(float)
      if(delta_calcAngleYZ(pos[0][0], pos[1][0], pos[2][0]) != "error"):
-          q_inv[0][0] = delta_calcAngleYZ(pos[0][0], pos[1][0], pos[2][0])
-          q_inv[1][0] = delta_calcAngleYZ(pos[0][0]*np.cos(np.deg2rad(120)) + pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))-pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0])  #rotate coords to +120 deg
-          q_inv[2][0] = delta_calcAngleYZ(pos[0][0]*np.cos(np.deg2rad(120)) - pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))+pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0])  #rotate coords to -120 deg
+        q_inv[0][0] = delta_calcAngleYZ(pos[0][0], pos[1][0], pos[2][0])
+     else: return "error"
+     if(delta_calcAngleYZ(pos[0][0]*np.cos(np.deg2rad(120)) + pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))-pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0]) != "error"):
+        q_inv[1][0] = delta_calcAngleYZ(pos[0][0]*np.cos(np.deg2rad(120)) + pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))-pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0])  #rotate coords to +120 deg
+     else: return "error"
+     if(pos[0][0]*np.cos(np.deg2rad(120)) - pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))+pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0] != "error"):
+        q_inv[2][0] = delta_calcAngleYZ(pos[0][0]*np.cos(np.deg2rad(120)) - pos[1][0]*np.sin(np.deg2rad(120)), pos[1][0]*np.cos(np.deg2rad(120))+pos[0][0]*np.sin(np.deg2rad(120)), pos[2][0])  #rotate coords to -120 deg
      else: return "error"
 
      return q_inv
 
 def find_theta(pos):
     
+    A_x1 = 0
     A_y1 = -f*np.tan(np.deg2rad(30))/2 
     A_z1 = 0
 
+    A_x2 = f*np.tan(np.deg2rad(30))/2 * np.cos(np.deg2rad(30))
     A_y2 = f*np.tan(np.deg2rad(30))/2 * np.sin(np.deg2rad(30))
     A_z2 = 0
 
+    A_x3 = -f*np.tan(np.deg2rad(30))/2 * np.cos(np.deg2rad(30))
     A_y3 = f*np.tan(np.deg2rad(30))/2 * np.sin(np.deg2rad(30))
     A_z3 = 0
-
+    # print("a_xyz",0,A_y1,A_z1,A_x2,A_y2,A_z2,A_x3,A_y3,A_z3)
     C_x1 = pos[0][0]
     C_y1 = pos[1][0] - e*np.tan(np.deg2rad(30))/2
     C_z1 = pos[2][0]
@@ -130,10 +137,15 @@ def find_theta(pos):
     C_x3 = pos[0][0] - e*np.tan(np.deg2rad(30))/2 * np.cos(np.deg2rad(30))
     C_y3 = pos[1][0] + e*np.tan(np.deg2rad(30))/2 * np.sin(np.deg2rad(30))
     C_z3 = pos[2][0]
+    # print("a_xyz",C_x1,C_y1,C_z1,C_x2,C_y2,C_z2,C_x3,C_y3,C_z3)
+    AC1 = np.sqrt((A_x1-C_x1)**2 + (A_y1-C_y1)**2 + (A_z1-C_z1)**2)
+    AC2 = np.sqrt((A_x2-C_x2)**2 + (A_y2-C_y2)**2 + (A_z2-C_z2)**2)
+    AC3 = np.sqrt((A_x3-C_x3)**2 + (A_y3-C_y3)**2 + (A_z3-C_z3)**2)
 
-    AC1 = np.sqrt((A_y1-C_y1)**2 + (A_z1-C_z1)**2)
-    AC2 = np.sqrt((A_y2-C_y2)**2 + (A_z2-C_z2)**2)
-    AC3 = np.sqrt((A_y3-C_y3)**2 + (A_z3-C_z3)**2)
+    # print("AC1",A_x1-C_x1,A_y1-C_y1,A_z1-C_z1)
+    # print("AC2",A_x2-C_x2,A_y2-C_y2,A_z2-C_z2)
+    # print("AC3",A_x3-C_x3,A_y3-C_y3,A_z3-C_z3)
+    # print("ac",AC1,AC2,AC3)
 
     theta2 = np.array([[0, 0, 0]]).T.astype(float)
     theta2[0][0] = np.arccos((AC1**2 - rf**2 - re**2)/(2*rf*re))
@@ -141,14 +153,21 @@ def find_theta(pos):
     theta2[2][0] = np.arccos((AC3**2 - rf**2 - re**2)/(2*rf*re))
 
     theta3 = np.array([[0, 0, 0]]).T.astype(float)
-    theta3[0][0] = 90 - np.rad2deg(np.arcsin(C_x1/re))
-    theta3[1][0] = 90 - np.rad2deg(np.arcsin(C_x2/re))
-    theta3[2][0] = 90 - np.rad2deg(np.arcsin(C_x3/re)) 
+    theta3[0][0] = np.pi - np.arcsin(C_x1/re)
+    theta3[1][0] = np.pi - np.arcsin(C_x2/re)
+    theta3[2][0] = np.pi - np.arcsin(C_x3/re)
+
+    # print(2*rf*re)
+    # print(AC1**2 - rf**2 - re**2)
+    # print(AC2**2 - rf**2 - re**2)
+    # print(AC3**2 - rf**2 - re**2)
+
 
     return theta2, theta3
 
 
 def Jacobian_pose(theta1, theta2, theta3):
+    theta2, theta3 = np.rad2deg(theta2), np.rad2deg(theta3)
     alpha = np.array([[0, 120, 240]]).T
     Jl_v = np.zeros((3,3))
     for i in range(3):
@@ -168,6 +187,17 @@ def input2array(theta1,theta2,theta3):
 
 def array2theta(theta):
     return theta.T
+
+def check_sigularity(Ja_v):
+    print("Det_Jacobian")
+    print(np.linalg.det(Ja_v))
+    if np.linalg.det(Ja_v) < 0.01: 
+        status = "Sigularity"
+    else: status = "Pass"
+
+    return status
+
+
 
 # q = input2array(90,90,90)
 
