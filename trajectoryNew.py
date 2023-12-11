@@ -1,6 +1,36 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+class Trapezoidal:
+    def __init__(self,dt,acceleration_max):
+        self.acceleration_max = acceleration_max
+        self.dt = dt
+        self.qi = None
+        self.qf = None
+        self.time_max = None
+        self.velocity_Constraint = None
+
+    def path(self,qi,qf):
+        self.qi = qi
+        self.qf = qf
+
+        self.time_max = calcTimeMax(qi,qf,self.acceleration_max)
+        self.velocity_Constraint = calcallVelocityConstraint(qi,qf,self.acceleration_max,self.time_max)
+    def traject_gen(self, current_time):
+        current_time1, positionJ1, velocityJ1, accelerationJ1 = trajectory_trapezoidal(self.qi[0][0], self.qf[0][0], self.velocity_Constraint[0][0], self.acceleration_max, self.dt, current_time, self.time_max)
+        current_time2, positionJ2, velocityJ2, accelerationJ2 = trajectory_trapezoidal(self.qi[1][0], self.qf[1][0], self.velocity_Constraint[1][0], self.acceleration_max, self.dt, current_time, self.time_max)
+        current_time3, positionJ3, velocityJ3, accelerationJ3 = trajectory_trapezoidal(self.qi[2][0], self.qf[2][0], self.velocity_Constraint[2][0], self.acceleration_max, self.dt, current_time, self.time_max)
+
+        q_traj = np.array([[positionJ1],[positionJ2],[positionJ3]])
+        v_traj = np.array([[velocityJ1],[velocityJ2],[velocityJ3]])
+        a_traj = np.array([[accelerationJ1],[accelerationJ2],[accelerationJ3]])
+        current_time = np.array([[current_time1],[current_time2],[current_time3]])
+        return q_traj,  v_traj, a_traj, current_time
+
+
+
+
+
 def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, dt, current_time, end_time):
     # Check for division by zero
     if max_accelJ == 0:
@@ -124,30 +154,20 @@ def calcVelocityConstraint(initial_posJ,target_posJ, max_accelJ, time_max):
 def calcTimeMax(qi,qf,accel_max):
     # Calculate Time Max of q1, q2, q3
     max_time = np.array([[0,0,0]]).T.astype(float)
-    max_time[0][0] = calcTime(qi[0], qf[0][0], 50, accel_max)
-    max_time[1][0] = calcTime(qi[1], qf[1][0], 50, accel_max)
-    max_time[2][0] = calcTime(qi[2], qf[2][0], 50, accel_max) 
+    max_time[0][0] = calcTime(qi[0][0], qf[0][0], 50, accel_max)
+    max_time[1][0] = calcTime(qi[1][0], qf[1][0], 50, accel_max)
+    max_time[2][0] = calcTime(qi[2][0], qf[2][0], 50, accel_max) 
     time_max = max_time.max()
     return time_max
 
 def calcallVelocityConstraint(qi,qf,accel_max,time_max):
     # Calculate Velocity Max of q'1, q'2, q'3
     velo_Constraint = np.array([[0,0,0]]).T.astype(float)
-    velo_Constraint[0][0] = calcVelocityConstraint(qi[0],qf[0][0], accel_max, time_max)
-    velo_Constraint[1][0] = calcVelocityConstraint(qi[1],qf[1][0], accel_max, time_max)
-    velo_Constraint[2][0] = calcVelocityConstraint(qi[2],qf[2][0], accel_max, time_max)
+    velo_Constraint[0][0] = calcVelocityConstraint(qi[0][0],qf[0][0], accel_max, time_max)
+    velo_Constraint[1][0] = calcVelocityConstraint(qi[1][0],qf[1][0], accel_max, time_max)
+    velo_Constraint[2][0] = calcVelocityConstraint(qi[2][0],qf[2][0], accel_max, time_max)
     # print("Velocity Compute :\n",velo_Constraint)
     return velo_Constraint
 
 
 
-def traject_gen(qi, qf, velo_Constraint, accel_max, dt, current_time, time_max):
-    current_time1, positionJ1, velocityJ1, accelerationJ1 = trajectory_trapezoidal(qi[0], qf[0], velo_Constraint[0][0], accel_max, dt, current_time, time_max)
-    current_time2, positionJ2, velocityJ2, accelerationJ2 = trajectory_trapezoidal(qi[1], qf[1], velo_Constraint[1][0], accel_max, dt, current_time, time_max)
-    current_time3, positionJ3, velocityJ3, accelerationJ3 = trajectory_trapezoidal(qi[2], qf[2], velo_Constraint[2][0], accel_max, dt, current_time, time_max)
-
-    q_prime = np.array([[positionJ1],[positionJ2],[positionJ3]])
-    v_prime = np.array([[velocityJ1],[velocityJ2],[velocityJ3]])
-    a_prime = np.array([[accelerationJ1],[accelerationJ2],[accelerationJ3]])
-    current_time = np.array([[current_time1],[current_time2],[current_time3]])
-    return q_prime, v_prime, a_prime, current_time

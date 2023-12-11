@@ -45,22 +45,24 @@ def pos_get():
 posBox = INPUTBox(init_value = init_pos,buttonbind=pos_get)
 
 
+# Move
+
 wtext(text='     ' )
-wtext(text='Destination Input    :  ' )
-con = False
-con_delay = False
-def con_get():
-    global con
-    con = not con
-
-desBox = INPUTBox(buttonbind=con_get)
+wtext(text='Mode    :  ' )
+wtext(text='     ' )
 
 
-way = sphere(pos = vector(0,0,0), radius = 15,color = color.white,emissive=True)
-
-tip = sphere(pos=vector(0,0,0), radius=1,  make_trail=True) 
-tip.trail_color = color.green
-tip.trail_radius = 3
+mode = "MoveJ"
+mode_delay = "MoveJ"
+def mode_get():
+    global mode
+    if mode == "MoveJ":
+        mode = "MoveL"
+        modeButton.text = "MoveL"
+    else:
+        mode = "MoveJ"
+        modeButton.text = "MoveJ"
+modeButton = button(bind=mode_get,text="MoveJ")
 
 
 wtext(text='\n\n Angle Input    :  ' )
@@ -76,86 +78,124 @@ def theta_get():
     posBox.update_positions(p)
 
 thetaBox = INPUTBox(buttonbind=theta_get)
+
+wtext(text='     ' )
+wtext(text='Destination Input    :  ' )
+con = False
+con_delay = False
+def con_get():
+    global con
+    con = not con
+
+desBox = INPUTBox(buttonbind=con_get)
+des_pos_delay = np.array([[0],[0],[0]])
+
+way = sphere(pos = vector(0,0,0), radius = 15,color = color.white,emissive=True)
+
+tip = sphere(pos=vector(0,0,0), radius=1,  make_trail=True) 
+tip.trail_color = color.green
+tip.trail_radius = 3
+
+#parameter
 dt = 1/60
+
+#control
 Kp = 10
 Ki = 0
 sum_e = 0
 
-#trajj
+#Trajectory 
 #3kg accel = 100m/s**2
-dt = 1/60
-accel_max = 1000
+angular_acceleration_max = 1000 #deg/s
+linear_acceleration_max = 100000 #mm/s
+moveJ = Trapezoidal(dt,angular_acceleration_max)
+moveL = Trapezoidal(dt,linear_acceleration_max)
 
 
-from time import sleep
-des_pos_delay = np.array([[0],[0],[0]])
 while True:
+    #fram rate
     rate(60)
     
+    #get des 
     x_des , y_des ,z_des = desBox.getText()
     way.pos = vector(x_des , y_des ,z_des)
     
     des_pos = np.array([[x_des] , [y_des] ,[z_des]])
     rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(q)
-    # print(des_pos_delay != des_pos)
-    if not np.all(des_pos_delay == des_pos):
-        print(delta_calculate.delta_calcInverse(des_pos))
+
+    #rising edge des input
+    if (not np.all(des_pos_delay == des_pos)) or mode != mode_delay:
         if delta_calculate.delta_calcInverse(des_pos) != "error":
-            q_inv = delta_calculate.delta_calcInverse(des_pos)
-            qi = q.T[0]
-            qf = q_inv.T[0]
+            
 
-            #compute 
-            time_max = calcTimeMax(qi,q_inv,accel_max)
-            velo_Constraint = calcallVelocityConstraint(qi,q_inv,accel_max,time_max)
-            print(qi, qf)
+            #traject param
 
+            if mode == "MoveJ":
+                qi = q
+                qf = delta_calculate.delta_calcInverse(des_pos)
+                
+                moveJ.path(qi,qf)
+            else:              
+                moveL.path(pos,des_pos)
+           
             tip.clear_trail()
             tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
+
+
             
-            for c_time in np.arange(0,time_max,dt):
-                print("kuy"*100)
-                print("base",base.sphere_object1.pos,base.sphere_object2.pos,base.sphere_object3.pos)
-                print("eff",eff.frame1.pos,eff.frame2.pos,eff.frame3.pos)
-                q_traj, _, _, _ = traject_gen(qi, qf, velo_Constraint, accel_max, dt, c_time, time_max)
-                _,_,_,pos_traj = delta_calculate.delta_calcForward(q_traj)
-                print(q_traj)
-                theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
-                # print(q_traj)
-                print("theta2",theta2_traj)
-                # print(theta3_traj)
-                Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
+            if mode == "MoveJ":
+                #Path move J Check
+                for c_time in np.arange(0,moveJ.time_max,dt):
+                    
+                    q_traj,  _, _, _ = moveJ.traject_gen(c_time)
+                    
+                    #find pos of move
+                    _,_,_,pos_traj = delta_calculate.delta_calcForward(q_traj)
+                    
+                    #J check
+                    theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
+                    Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
+                    Sigularity_status = delta_calculate.check_sigularity(Ja_v)
+
+                    #delay for trail
+                    sleep(1/10000)
+
+                    #trail update
+                    tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
+            else:
                 
-                Sigularity_status = delta_calculate.check_sigularity(Ja_v)
-                
-                # print("pos_traj:")
-                # print(pos_traj)
-                # print(pos_traj)
-                sleep(1/10000)
-                # print(vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0]))
-                tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
-    
-    
+                #Path move L Check
+                for c_time in np.arange(0,moveL.time_max,dt):
+                    
+                    pos_traj ,  _, _, _ = moveL.traject_gen(c_time)
+
+                    #delay for trail
+                    sleep(1/10000)
+
+                    #trail update
+                    tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
+
     
     if con == True:
         if con_delay == False:
             #input
             current_time = 0
-            q_inv = delta_calculate.delta_calcInverse(des_pos)
-            qi = q.T[0]
-            qf = q_inv.T[0]
-
-            #compute 
-            time_max = calcTimeMax(qi,q_inv,accel_max)
-            velo_Constraint = calcallVelocityConstraint(qi,q_inv,accel_max,time_max)
+            qi = q
+            qf = delta_calculate.delta_calcInverse(des_pos)
+            if mode == "MoveJ":       
+                moveJ.path(qi,qf)
+            else:
+                moveL.path(pos,des_pos)
 
             
         desBox.button.background = color.red   
         desBox.button.text = "Stop!"
         
-        
-        q_traj, v_prime, a_prime, _ = traject_gen(qi, qf, velo_Constraint, accel_max, dt, current_time, time_max)
-
+        if mode == "MoveJ":
+            q_traj,  _, _, _ = moveJ.traject_gen(current_time)
+        else:
+            pos_traj ,  _, _, _ = moveL.traject_gen(current_time)
+            q_traj = delta_calculate.delta_calcInverse(pos_traj)
 
 
         #con
@@ -171,7 +211,7 @@ while True:
 
         
 
-        if np.linalg.norm(q_inv - q) < 0.001 :
+        if np.linalg.norm(qf - q) < 0.001 :
 
             con = False
             
@@ -179,7 +219,7 @@ while True:
         desBox.button.background = color.white
         desBox.button.text = "Enter"
 
-        
+    mode_delay = mode
     con_delay = con
     des_pos_delay = des_pos
 
