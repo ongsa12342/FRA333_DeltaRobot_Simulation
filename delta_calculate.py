@@ -190,7 +190,7 @@ def array2theta(theta):
 def check_sigularity(Ja_v):
     print("Det_Jacobian")
     print(np.linalg.det(Ja_v))
-    if np.linalg.det(Ja_v) < 0.01: 
+    if np.abs(np.linalg.det(Ja_v)) < 3.5*10**(-13): 
         status = "Sigularity"
     else: status = "Pass"
 

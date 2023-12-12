@@ -155,9 +155,10 @@ while True:
                     _,_,_,pos_traj = delta_calculate.delta_calcForward(q_traj)
                     
                     #J check
-                    # theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
-                    # Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
-                    # Sigularity_status = delta_calculate.check_sigularity(Ja_v)
+                    theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
+                    Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
+                    Sigularity_status = delta_calculate.check_sigularity(Ja_v)
+                    print(Sigularity_status)
 
                     #delay for trail
                     sleep(1/120)

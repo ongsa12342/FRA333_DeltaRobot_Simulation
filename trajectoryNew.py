@@ -147,14 +147,14 @@ def calcTime(initial_posJ, target_posJ, max_veloJ, max_accelJ):
 
 # Calculate Velocity Max
 def calcVelocityConstraint(initial_posJ,target_posJ, max_accelJ, time_max):
-    print(time_max)
-    print(max_accelJ)
-    print(np.abs(target_posJ-initial_posJ))
-    print("sqrt",(max_accelJ * time_max)**2 - 4 * np.abs(target_posJ-initial_posJ) * max_accelJ)
-    print((max_accelJ * time_max)**2)
-    print(4 * np.abs(target_posJ-initial_posJ) * max_accelJ)
+    # print(time_max)
+    # print(max_accelJ)
+    # print(np.abs(target_posJ-initial_posJ))
+    # print("sqrt",(max_accelJ * time_max)**2 - 4 * np.abs(target_posJ-initial_posJ) * max_accelJ)
+    # print((max_accelJ * time_max)**2)
+    # print(4 * np.abs(target_posJ-initial_posJ) * max_accelJ)
     veloCompute = ((max_accelJ * time_max) - np.sqrt((max_accelJ * time_max)**2 - 4 * np.abs(target_posJ-initial_posJ) * max_accelJ))/2
-    print("velocityCompute:", veloCompute)
+    # print("velocityCompute:", veloCompute)
     return veloCompute
 
 
@@ -165,7 +165,7 @@ def calcTimeMax(qi,qf,vel_max,accel_max):
     max_time[1][0] = calcTime(qi[1][0], qf[1][0], vel_max, accel_max)
     max_time[2][0] = calcTime(qi[2][0], qf[2][0], vel_max, accel_max) 
     time_max = max_time.max()
-    print("TimeMax:", time_max)
+    # print("TimeMax:", time_max)
     return time_max
 
 def calcallVelocityConstraint(qi,qf,accel_max,time_max):
