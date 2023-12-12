@@ -66,7 +66,6 @@ class BASE:
         )
 
 
-
 class RF:
     def __init__(self, size = 4, link_length = link_length):
         self.size = size
@@ -140,7 +139,8 @@ class RE:
         # self.re3.axis = vector(pos[0] , pos[1], pos[2]) -  self.re3.pos+ vector(1,1,0)
 
 class EFF:
-    def __init__(self, eff_link_size=eff_link_size):
+    def __init__(self,eff_link=eff_link, eff_link_size=eff_link_size):
+        self.eff_link = eff_link
         self.sphere_object = sphere(pos=vector(0, 0, 0), radius=ball_size, color=color.red)
         self.eff_link_size = eff_link_size
         self.frame1 = cylinder(
@@ -164,9 +164,9 @@ class EFF:
 
     def update_positions(self, pos):
         self.sphere_object.pos = vector(pos[0] , pos[1], pos[2])
-        self.frame1.pos = vector(pos[0] , pos[1], pos[2]) + vector(0, -eff_link, 0)
-        self.frame2.pos = vector(pos[0] , pos[1], pos[2]) + vector(eff_link * np.cos(np.radians(30)), eff_link * np.cos(np.radians(60)), 0)
-        self.frame3.pos = vector(pos[0] , pos[1], pos[2]) + vector(-eff_link * np.cos(np.radians(30)), eff_link * np.cos(np.radians(60)), 0)
+        self.frame1.pos = vector(pos[0] , pos[1], pos[2]) + vector(0, -self.eff_link, 0)
+        self.frame2.pos = vector(pos[0] , pos[1], pos[2]) + vector(self.eff_link * np.cos(np.radians(30)), self.eff_link * np.cos(np.radians(60)), 0)
+        self.frame3.pos = vector(pos[0] , pos[1], pos[2]) + vector(-self.eff_link * np.cos(np.radians(30)), self.eff_link * np.cos(np.radians(60)), 0)
         # vector(pos[0] , pos[1], pos[2]) + vector(-eff_link * np.cos(np.radians(30)), eff_link * np.cos(np.radians(60)), 0)
         self.frame1.axis = self.frame2.pos - self.frame1.pos
         self.frame2.axis = self.frame3.pos - self.frame2.pos
@@ -189,3 +189,9 @@ class INPUTBox:
 
     def getText(self):
         return float(self.a.text), float(self.b.text), float(self.c.text)
+    
+    def delete(self):
+        self.a.delete()
+        self.b.delete()
+        self.c.delete()
+        self.button.delete()

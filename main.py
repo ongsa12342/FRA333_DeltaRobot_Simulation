@@ -6,6 +6,7 @@ from delta_graphic import RF,RE,EFF , BASE, INPUTBox
 import numpy as np
 from time import sleep
 from trajectoryNew import *
+
 base = BASE()
 rf = RF()
 re = RE()
@@ -23,6 +24,7 @@ theta1 = 0
 theta2 = 0
 theta3 = 0
 q = delta_calculate.input2array(theta1, theta2, theta3)
+
 wtext(text='\n' )
 wt = wtext(text='\n' )
 # Create winput widgets for x, y, and z
@@ -113,7 +115,7 @@ linear_acceleration_max = 100000 #mm/s
 moveJ = Trapezoidal(dt,angular_velocity_max,angular_acceleration_max)
 moveL = Trapezoidal(dt,linear_velocity_max,linear_acceleration_max)
 
-q_de =[]
+
 while True:
     #fram rate
     rate(1/dt)
@@ -127,6 +129,11 @@ while True:
 
     #rising edge des input
     if (not np.all(des_pos_delay == des_pos)) or mode != mode_delay:
+        sleep(0.05)
+        tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
+        tip.clear_trail()
+        sleep(0.05)
+        tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
         if delta_calculate.delta_calcInverse(des_pos) != "error":
             
 
@@ -140,16 +147,13 @@ while True:
                 
             else:              
                 moveL.path(pos,des_pos)
-           
-            tip.clear_trail()
-            sleep(dt)
-            tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
+            
 
             
             if mode == "MoveJ":
                 #Path move J Check
                 for c_time in np.arange(0,moveJ.time_max+dt,dt):
-                    
+
                     q_traj,  _, _, _ = moveJ.traject_gen(c_time)
                     
                     #find pos of move
@@ -170,7 +174,7 @@ while True:
                 
                 #Path move L Check
                 for c_time in np.arange(0,moveL.time_max+dt,dt):
-                    
+
                     pos_traj ,  _, _, _ = moveL.traject_gen(c_time)
 
                     #delay for trail
@@ -228,7 +232,7 @@ while True:
     mode_delay = mode
     con_delay = con
     des_pos_delay = des_pos
-    q_de = q
+
     rf.update_positions(rf1_pos.reshape(3,),rf2_pos.reshape(3,),rf3_pos.reshape(3,))
     re.update_positions(rf1_pos.reshape(3,),rf2_pos.reshape(3,),rf3_pos.reshape(3,),pos.reshape(3,))
     eff.update_positions(pos.reshape(3,))
