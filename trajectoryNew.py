@@ -2,19 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Trapezoidal:
-    def __init__(self,dt,acceleration_max):
+    def __init__(self,dt, velocity_max, acceleration_max):
         self.acceleration_max = acceleration_max
         self.dt = dt
         self.qi = None
         self.qf = None
         self.time_max = None
         self.velocity_Constraint = None
+        self.velocity_max = velocity_max
 
     def path(self,qi,qf):
         self.qi = qi
         self.qf = qf
 
-        self.time_max = calcTimeMax(qi,qf,self.acceleration_max)
+        self.time_max = calcTimeMax(qi,qf, self.velocity_max,self.acceleration_max)
         self.velocity_Constraint = calcallVelocityConstraint(qi,qf,self.acceleration_max,self.time_max)
     def traject_gen(self, current_time):
         current_time1, positionJ1, velocityJ1, accelerationJ1 = trajectory_trapezoidal(self.qi[0][0], self.qf[0][0], self.velocity_Constraint[0][0], self.acceleration_max, self.dt, current_time, self.time_max)
@@ -138,26 +139,33 @@ def calcTime(initial_posJ, target_posJ, max_veloJ, max_accelJ):
         time_total = 2 * time_accel + (s - (max_veloJ ** 2) / max_accelJ) / max_veloJ
     else:
     # Calculate the time required for acceleration and deceleration
-        time_accel = np.sqrt(s / max_accelJ)
+        time_accel = np.sqrt(2*s / max_accelJ)
         time_total = 2 * time_accel
-    time = np.arange(0, time_total, 0.01)
     
     return  time_total
 
 
 # Calculate Velocity Max
 def calcVelocityConstraint(initial_posJ,target_posJ, max_accelJ, time_max):
-    veloCompute = ((max_accelJ * time_max) - np.sqrt(((max_accelJ * time_max)**2 - 4 * np.abs(target_posJ-initial_posJ) * max_accelJ)))/2
+    print(time_max)
+    print(max_accelJ)
+    print(np.abs(target_posJ-initial_posJ))
+    print("sqrt",(max_accelJ * time_max)**2 - 4 * np.abs(target_posJ-initial_posJ) * max_accelJ)
+    print((max_accelJ * time_max)**2)
+    print(4 * np.abs(target_posJ-initial_posJ) * max_accelJ)
+    veloCompute = ((max_accelJ * time_max) - np.sqrt((max_accelJ * time_max)**2 - 4 * np.abs(target_posJ-initial_posJ) * max_accelJ))/2
+    print("velocityCompute:", veloCompute)
     return veloCompute
 
 
-def calcTimeMax(qi,qf,accel_max):
+def calcTimeMax(qi,qf,vel_max,accel_max):
     # Calculate Time Max of q1, q2, q3
     max_time = np.array([[0,0,0]]).T.astype(float)
-    max_time[0][0] = calcTime(qi[0][0], qf[0][0], 50, accel_max)
-    max_time[1][0] = calcTime(qi[1][0], qf[1][0], 50, accel_max)
-    max_time[2][0] = calcTime(qi[2][0], qf[2][0], 50, accel_max) 
+    max_time[0][0] = calcTime(qi[0][0], qf[0][0], vel_max, accel_max)
+    max_time[1][0] = calcTime(qi[1][0], qf[1][0], vel_max, accel_max)
+    max_time[2][0] = calcTime(qi[2][0], qf[2][0], vel_max, accel_max) 
     time_max = max_time.max()
+    print("TimeMax:", time_max)
     return time_max
 
 def calcallVelocityConstraint(qi,qf,accel_max,time_max):

@@ -21,27 +21,27 @@ def delta_calcForward(q_forward, e = e, f = f  , re = re , rf = rf ):
     # q_forward[1][0] = np.deg2rad(q_forward[1])
     # q_forward[2][0] = np.deg2rad(q_forward[2])
 
-    y1 = -(f*np.tan(np.deg2rad(30))/2 + rf*np.cos(np.deg2rad(q_forward[0][0])))
-    z1 = -rf*np.sin(np.deg2rad(q_forward[0][0]))
+    y1 = -(f*np.tan(np.deg2rad(30))/2 + rf*np.cos(q_forward[0][0]))
+    z1 = -rf*np.sin(q_forward[0][0])
 
-    y2 = (f*np.tan(np.deg2rad(30))/2 + rf*np.cos(np.deg2rad(q_forward[1][0])))*np.sin(np.deg2rad(30))
+    y2 = (f*np.tan(np.deg2rad(30))/2 + rf*np.cos(q_forward[1][0]))*np.sin(np.deg2rad(30))
     x2 = y2*np.tan(np.deg2rad(60))
-    z2 = -rf*np.sin(np.deg2rad(q_forward[1][0]))
+    z2 = -rf*np.sin(q_forward[1][0])
 
-    y3 = (f*np.tan(np.deg2rad(30))/2 + rf*np.cos(np.deg2rad(q_forward[2][0])))*np.sin(np.deg2rad(30))
+    y3 = (f*np.tan(np.deg2rad(30))/2 + rf*np.cos(q_forward[2][0]))*np.sin(np.deg2rad(30))
     x3 = -y3*np.tan(np.deg2rad(60))
-    z3 = -rf*np.sin(np.deg2rad(q_forward[2][0]))
+    z3 = -rf*np.sin(q_forward[2][0])
 
-    y1_e = -(t + rf*np.cos(np.deg2rad(q_forward[0][0])))
-    z1_e = -rf*np.sin(np.deg2rad(q_forward[0][0]))
+    y1_e = -(t + rf*np.cos(q_forward[0][0]))
+    z1_e = -rf*np.sin(q_forward[0][0])
 
-    y2_e = (t + rf*np.cos(np.deg2rad(q_forward[1][0])))*np.sin(np.deg2rad(30))
+    y2_e = (t + rf*np.cos(q_forward[1][0]))*np.sin(np.deg2rad(30))
     x2_e = y2_e*np.tan(np.deg2rad(60))
-    z2_e = -rf*np.sin(np.deg2rad(q_forward[1][0]))
+    z2_e = -rf*np.sin(q_forward[1][0])
 
-    y3_e = (t + rf*np.cos(np.deg2rad(q_forward[2][0])))*np.sin(np.deg2rad(30))
+    y3_e = (t + rf*np.cos(q_forward[2][0]))*np.sin(np.deg2rad(30))
     x3_e = -y3_e*np.tan(np.deg2rad(60))
-    z3_e = -rf*np.sin(np.deg2rad(q_forward[2][0]))
+    z3_e = -rf*np.sin(q_forward[2][0])
 
     dnm = (y2_e-y1_e)*x3_e-(y3_e-y1_e)*x2_e
 
@@ -91,7 +91,7 @@ def delta_calcAngleYZ(x0, y0, z0):
     if (d < 0): return "error" # non-existing point
     yj = (y1 - a*b - np.sqrt(d))/(b*b + 1) # choosing outer point
     zj = a + b*yj
-    theta = np.rad2deg(np.arctan2(-zj, (y1 - yj)))
+    theta = np.arctan2(-zj, (y1 - yj))
     return theta
 
 #inverse kinematics: (x0, y0, z0) -> (q_forward[0][0][0][0], q_forward[1][0], q_forward[2][0])
@@ -167,17 +167,16 @@ def find_theta(pos):
 
 
 def Jacobian_pose(theta1, theta2, theta3):
-    theta2, theta3 = np.rad2deg(theta2), np.rad2deg(theta3)
-    alpha = np.array([[0, 120, 240]]).T
+    alpha = np.deg2rad(np.array([[0, 120, 240]]).T)
     Jl_v = np.zeros((3,3))
     for i in range(3):
-        Jl_v[i][0] = -np.sin(np.deg2rad(theta3[i][0])) * np.cos(np.deg2rad(theta2[i][0] + theta1[i][0])) * np.sin(np.deg2rad(alpha[i][0])) + np.cos(np.deg2rad(theta3[i][0])) * np.cos(np.deg2rad(alpha[i][0]))
-        Jl_v[i][1] = np.sin(np.deg2rad(theta3[i][0])) * np.cos(np.deg2rad(theta2[i][0] + theta1[i][0])) * np.cos(np.deg2rad(alpha[i][0])) + np.cos(np.deg2rad(theta3[i][0])) * np.sin(np.deg2rad(alpha[i][0]))
-        Jl_v[i][2] = -np.sin(np.deg2rad(theta3[i][0])) * np.sin(np.deg2rad(theta2[i][0] + theta1[i][0])) 
+        Jl_v[i][0] = -np.sin(theta3[i][0]) * np.cos(theta2[i][0] + theta1[i][0]) * np.sin(alpha[i][0]) + np.cos(theta3[i][0]) * np.cos(alpha[i][0])
+        Jl_v[i][1] = np.sin(theta3[i][0]) * np.cos(theta2[i][0] + theta1[i][0]) * np.cos(alpha[i][0]) + np.cos(theta3[i][0]) * np.sin(alpha[i][0])
+        Jl_v[i][2] = -np.sin(theta3[i][0]) * np.sin(theta2[i][0] + theta1[i][0]) 
 
     Ja_v = np.zeros((3,3))
     for i in range(3):
-        Ja_v[i][i] = rf * np.sin(np.deg2rad(theta2[i][0])) * np.sin(np.deg2rad(theta3[i][0]))
+        Ja_v[i][i] = rf * np.sin(theta2[i][0]) * np.sin(theta3[i][0])
 
     return Jl_v, Ja_v
 
