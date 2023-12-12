@@ -100,18 +100,20 @@ tip.trail_radius = 3
 dt = 1/60
 
 #control
-Kp = 10
+Kp = 5
 Ki = 0
 sum_e = 0
 
 #Trajectory 
 #3kg accel = 100m/s**2
-angular_acceleration_max = 1000 #deg/s
+angular_velocity_max = 1000 #deg/s
+linear_velocity_max = 10000 #mm/s
+angular_acceleration_max = 10000 #deg/s
 linear_acceleration_max = 100000 #mm/s
-moveJ = Trapezoidal(dt,angular_acceleration_max)
-moveL = Trapezoidal(dt,linear_acceleration_max)
+moveJ = Trapezoidal(dt,angular_velocity_max,angular_acceleration_max)
+moveL = Trapezoidal(dt,linear_velocity_max,linear_acceleration_max)
 
-
+q_de =[]
 while True:
     #fram rate
     rate(60)
@@ -135,12 +137,12 @@ while True:
                 qf = delta_calculate.delta_calcInverse(des_pos)
                 
                 moveJ.path(qi,qf)
+                
             else:              
                 moveL.path(pos,des_pos)
            
             tip.clear_trail()
             tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
-
 
             
             if mode == "MoveJ":
@@ -153,12 +155,12 @@ while True:
                     _,_,_,pos_traj = delta_calculate.delta_calcForward(q_traj)
                     
                     #J check
-                    theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
-                    Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
-                    Sigularity_status = delta_calculate.check_sigularity(Ja_v)
+                    # theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
+                    # Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
+                    # Sigularity_status = delta_calculate.check_sigularity(Ja_v)
 
                     #delay for trail
-                    sleep(1/10000)
+                    sleep(1/120)
 
                     #trail update
                     tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
@@ -170,7 +172,8 @@ while True:
                     pos_traj ,  _, _, _ = moveL.traject_gen(c_time)
 
                     #delay for trail
-                    sleep(1/10000)
+                    print(pos_traj)
+                    sleep(1/120)
 
                     #trail update
                     tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
@@ -198,6 +201,7 @@ while True:
             q_traj = delta_calculate.delta_calcInverse(pos_traj)
 
 
+
         #con
 
         error = q_traj - q
@@ -209,7 +213,6 @@ while True:
         posBox.update_positions(pos)
         
 
-        
 
         if np.linalg.norm(qf - q) < 0.001 :
 
@@ -222,7 +225,7 @@ while True:
     mode_delay = mode
     con_delay = con
     des_pos_delay = des_pos
-
+    q_de = q
     rf.update_positions(rf1_pos.reshape(3,),rf2_pos.reshape(3,),rf3_pos.reshape(3,))
     re.update_positions(rf1_pos.reshape(3,),rf2_pos.reshape(3,),rf3_pos.reshape(3,),pos.reshape(3,))
     eff.update_positions(pos.reshape(3,))
