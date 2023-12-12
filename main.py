@@ -4,12 +4,26 @@ import math
 import delta_calculate
 from delta_graphic import RF,RE,EFF , BASE, INPUTBox
 import numpy as np
+from delta_simulation import delta_robot_model
 from time import sleep
 
 base = BASE()
 rf = RF()
 re = RE()
 eff = EFF()
+
+# e = 44.95*2*np.sqrt(3)/1000 #155.71136760044206     #end effector #115.0
+# f = 200*2*np.sqrt(3)/1000   #346.41016151377545  #base #457.3
+# re = 800.0/1000 #232.0
+# rf = 235.0/1000 #112.0
+
+delta = delta_robot_model(frame_lenght= 200*2*np.sqrt(3)/1000, endeffector_lenght= 44.95*2*np.sqrt(3)/1000,
+                          upper_link= 235.0/1000, lower_link= 800.0/1000,
+                          upper_link_mass= 1, lower_link_mass= 0.5, endeffector_mass= 2)
+
+T = np.array([-0.5, -1, -0.5]).reshape(3, 1)
+# delta.set_initial_pose([0, 0, 0], "joint")
+# print(delta.p)
 
 scene_canvas = canvas.get_selected()
 scene_canvas.width = 1080  
@@ -73,13 +87,13 @@ def theta_get():
     posBox.update_positions(p)
 
 thetaBox = INPUTBox(buttonbind=theta_get)
-dt = 1/60
+dt = 1/1000
 Kp = 10
 Ki = 0
 sum_e = 0
 
 while True:
-    rate(60)
+    rate(1000)
     
     x_des , y_des ,z_des = desBox.getText()
     way.pos = vector(x_des , y_des ,z_des)
@@ -91,27 +105,33 @@ while True:
         desBox.button.text = "Stop!"
         theta2_np, theta3_np = delta_calculate.find_theta(pos)
 
-        error = des_pos - pos
-        sum_e = sum_e + error
-        V_e = Kp*error #+ Ki*sum_e*dt
+        # error = des_pos - pos
+        # sum_e = sum_e + error
+        # V_e = Kp*error #+ Ki*sum_e*dt
 
-        Jp, Jt = delta_calculate.Jacobian_pose(q,theta2_np,theta3_np)
-        Jt_inv = np.linalg.inv(Jt)
+        # Jp, Jt = delta_calculate.Jacobian_pose(q,theta2_np,theta3_np)
+        # Jt_inv = np.linalg.inv(Jt)
 
-        qd = np.dot(Jt_inv,np.dot(Jp,V_e))
+        q, qd, qdd = delta.dynamic_model(T, dt)
 
-        q = q + qd*dt
+        # qd = np.dot(Jt_inv,np.dot(Jp,V_e))
+        # qd = delta.qd
+        # qd = qd * 1000
+        # print(qd)
+        # q = q + qd*dt
         thetaBox.update_positions(q)
         posBox.update_positions(pos)
 
-        if np.linalg.norm(error) < 0.001 :
-            con = False
+        # if np.linalg.norm(error) < 0.001 :
+        #     con = False
             
     else:
         desBox.button.background = color.white
         desBox.button.text = "Enter"
 
-        
+    # rf.update_positions(delta.p1,delta.p2,delta.p3)
+    # re.update_positions(delta.p1,delta.p2,delta.p3,delta.p)
+    # eff.update_positions(delta.p)   
 
         
 
