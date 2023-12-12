@@ -97,7 +97,7 @@ tip.trail_color = color.green
 tip.trail_radius = 3
 
 #parameter
-dt = 1/60
+dt = 1/120
 
 #control
 Kp = 5
@@ -116,7 +116,7 @@ moveL = Trapezoidal(dt,linear_velocity_max,linear_acceleration_max)
 q_de =[]
 while True:
     #fram rate
-    rate(60)
+    rate(1/dt)
     
     #get des 
     x_des , y_des ,z_des = desBox.getText()
@@ -142,12 +142,13 @@ while True:
                 moveL.path(pos,des_pos)
            
             tip.clear_trail()
+            sleep(dt)
             tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
 
             
             if mode == "MoveJ":
                 #Path move J Check
-                for c_time in np.arange(0,moveJ.time_max,dt):
+                for c_time in np.arange(0,moveJ.time_max+dt,dt):
                     
                     q_traj,  _, _, _ = moveJ.traject_gen(c_time)
                     
@@ -158,23 +159,23 @@ while True:
                     theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
                     Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
                     Sigularity_status = delta_calculate.check_sigularity(Ja_v)
-                    print(Sigularity_status)
+                    # print(Sigularity_status)
 
                     #delay for trail
-                    sleep(1/120)
+                    sleep(dt)
 
                     #trail update
                     tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
             else:
                 
                 #Path move L Check
-                for c_time in np.arange(0,moveL.time_max,dt):
+                for c_time in np.arange(0,moveL.time_max+dt,dt):
                     
                     pos_traj ,  _, _, _ = moveL.traject_gen(c_time)
 
                     #delay for trail
-                    print(pos_traj)
-                    sleep(1/120)
+                    # print(pos_traj)
+                    sleep(dt)
 
                     #trail update
                     tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
@@ -215,8 +216,9 @@ while True:
         
 
 
-        if np.linalg.norm(qf - q) < 0.001 :
-
+        if np.linalg.norm(qf - q) < 1.745329e-5 :
+            print(q)
+            print(qf)
             con = False
             
     else:
