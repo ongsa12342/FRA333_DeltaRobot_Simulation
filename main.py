@@ -5,6 +5,7 @@ import delta_calculate
 from delta_graphic import RF,RE,EFF , BASE, INPUTBox
 import numpy as np
 from time import sleep
+from trajectoryNew import *
 
 base = BASE()
 rf = RF()
@@ -23,6 +24,7 @@ theta1 = 0
 theta2 = 0
 theta3 = 0
 q = delta_calculate.input2array(theta1, theta2, theta3)
+
 wtext(text='\n' )
 wt = wtext(text='\n' )
 # Create winput widgets for x, y, and z
@@ -45,19 +47,24 @@ def pos_get():
 posBox = INPUTBox(init_value = init_pos,buttonbind=pos_get)
 
 
+# Move
+
 wtext(text='     ' )
-wtext(text='Destination Input    :  ' )
-con = False
-def con_get():
-    global con
-    con = not con
-
-desBox = INPUTBox(buttonbind=con_get)
-desBox.c.text = -900
-
-way = sphere(pos = vector(0,0,0), radius = 15,color = color.white,emissive=True)
+wtext(text='Mode    :  ' )
+wtext(text='     ' )
 
 
+mode = "MoveJ"
+mode_delay = "MoveJ"
+def mode_get():
+    global mode
+    if mode == "MoveJ":
+        mode = "MoveL"
+        modeButton.text = "MoveL"
+    else:
+        mode = "MoveJ"
+        modeButton.text = "MoveJ"
+modeButton = button(bind=mode_get,text="MoveJ")
 
 
 wtext(text='\n\n Angle Input    :  ' )
@@ -73,47 +80,158 @@ def theta_get():
     posBox.update_positions(p)
 
 thetaBox = INPUTBox(buttonbind=theta_get)
-dt = 1/60
-Kp = 10
+
+wtext(text='     ' )
+wtext(text='Destination Input    :  ' )
+con = False
+con_delay = False
+def con_get():
+    global con
+    con = not con
+
+desBox = INPUTBox(buttonbind=con_get)
+des_pos_delay = np.array([[0],[0],[0]])
+
+way = sphere(pos = vector(0,0,0), radius = 15,color = color.white,emissive=True)
+
+tip = sphere(pos=vector(0,0,0), radius=1,  make_trail=True) 
+tip.trail_color = color.green
+tip.trail_radius = 3
+
+#parameter
+dt = 1/120
+
+#control
+Kp = 5
 Ki = 0
 sum_e = 0
 
+#Trajectory 
+#3kg accel = 100m/s**2
+angular_velocity_max = 1000 #deg/s
+linear_velocity_max = 10000 #mm/s
+angular_acceleration_max = 10000 #deg/s
+linear_acceleration_max = 100000 #mm/s
+moveJ = Trapezoidal(dt,angular_velocity_max,angular_acceleration_max)
+moveL = Trapezoidal(dt,linear_velocity_max,linear_acceleration_max)
+
+
 while True:
-    rate(60)
+    #fram rate
+    rate(1/dt)
     
+    #get des 
     x_des , y_des ,z_des = desBox.getText()
     way.pos = vector(x_des , y_des ,z_des)
-    des_pos = [[x_des] , [y_des] ,[z_des]]
+    
+    des_pos = np.array([[x_des] , [y_des] ,[z_des]])
     rf1_pos,rf2_pos,rf3_pos,pos = delta_calculate.delta_calcForward(q)
+
+    #rising edge des input
+    if (not np.all(des_pos_delay == des_pos)) or mode != mode_delay:
+        sleep(0.05)
+        tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
+        tip.clear_trail()
+        sleep(0.05)
+        tip.pos = vector(pos[0][0],pos[1][0],pos[2][0])
+        if delta_calculate.delta_calcInverse(des_pos) != "error":
+            
+
+            #traject param
+
+            if mode == "MoveJ":
+                qi = q
+                qf = delta_calculate.delta_calcInverse(des_pos)
+                
+                moveJ.path(qi,qf)
+                
+            else:              
+                moveL.path(pos,des_pos)
+            
+
+            
+            if mode == "MoveJ":
+                #Path move J Check
+                for c_time in np.arange(0,moveJ.time_max+dt,dt):
+
+                    q_traj,  _, _, _ = moveJ.traject_gen(c_time)
+                    
+                    #find pos of move
+                    _,_,_,pos_traj = delta_calculate.delta_calcForward(q_traj)
+                    
+                    #J check
+                    theta2_traj, theta3_traj = delta_calculate.find_theta(pos_traj)
+                    Jl_v, Ja_v = delta_calculate.Jacobian_pose(q_traj, theta2_traj, theta3_traj)
+                    Sigularity_status = delta_calculate.check_sigularity(Ja_v)
+                    # print(Sigularity_status)
+
+                    #delay for trail
+                    sleep(dt)
+
+                    #trail update
+                    tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
+            else:
+                
+                #Path move L Check
+                for c_time in np.arange(0,moveL.time_max+dt,dt):
+
+                    pos_traj ,  _, _, _ = moveL.traject_gen(c_time)
+
+                    #delay for trail
+                    # print(pos_traj)
+                    sleep(dt)
+
+                    #trail update
+                    tip.pos = vector(pos_traj[0][0],pos_traj[1][0],pos_traj[2][0])
+
     
     if con == True:
-        desBox.button.background = color.red
+        if con_delay == False:
+            #input
+            current_time = 0
+            qi = q
+            qf = delta_calculate.delta_calcInverse(des_pos)
+            if mode == "MoveJ":       
+                moveJ.path(qi,qf)
+            else:
+                moveL.path(pos,des_pos)
+
+            
+        desBox.button.background = color.red   
         desBox.button.text = "Stop!"
-        theta2_np, theta3_np = delta_calculate.find_theta(pos)
+        
+        if mode == "MoveJ":
+            q_traj,  _, _, _ = moveJ.traject_gen(current_time)
+        else:
+            pos_traj ,  _, _, _ = moveL.traject_gen(current_time)
+            q_traj = delta_calculate.delta_calcInverse(pos_traj)
 
-        error = des_pos - pos
-        sum_e = sum_e + error
-        V_e = Kp*error #+ Ki*sum_e*dt
 
-        Jp, Jt = delta_calculate.Jacobian_pose(q,theta2_np,theta3_np)
-        Jt_inv = np.linalg.inv(Jt)
 
-        qd = np.dot(Jt_inv,np.dot(Jp,V_e))
+        #con
 
-        q = q + qd*dt
+        error = q_traj - q
+        V_j = Kp*error
+
+        q = q + V_j*dt
+        current_time = current_time + dt
         thetaBox.update_positions(q)
         posBox.update_positions(pos)
+        
 
-        if np.linalg.norm(error) < 0.001 :
+
+        if np.linalg.norm(qf - q) < 1.745329e-5 :
+            print(q)
+            print(qf)
             con = False
             
     else:
         desBox.button.background = color.white
         desBox.button.text = "Enter"
 
-        
-
-        
+    mode_delay = mode
+    con_delay = con
+    des_pos_delay = des_pos
 
     rf.update_positions(rf1_pos.reshape(3,),rf2_pos.reshape(3,),rf3_pos.reshape(3,))
     re.update_positions(rf1_pos.reshape(3,),rf2_pos.reshape(3,),rf3_pos.reshape(3,),pos.reshape(3,))
