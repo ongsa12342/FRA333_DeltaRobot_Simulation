@@ -113,7 +113,7 @@ class DELTA_ROBOT_MODEL:
         if status == None:
             theta2, theta3 = self._find_theta(p)
             Jl, Ja = self._Jacobian(q, theta2, theta3)
-            if not self._check_singularity(Jl):
+            if not self._check_singularity(Ja):
                 pd = np.linalg.inv(Jl) @ Ja @ qd
                 error_status = None
             else: error_status = "singularity"
@@ -140,7 +140,7 @@ class DELTA_ROBOT_MODEL:
         G = np.array([0, 0, 0]).reshape(3, 1)
         for i in range(3):
             G[i] = (self.m[1] + self.m[2]) * -9.81 * self.rf * np.cos(self.q[i]) / 2.0
-        B = 0.5
+        B = 0.2
 
         self.qdd = np.linalg.inv(I) @ (T - (B * self.qd) - G)
         self.qd = self.qd + (self.qdd * dt)
@@ -163,14 +163,15 @@ class DELTA_ROBOT_MODEL:
         return Jl_v, Ja_v
     
     def _check_singularity(self, Ja_v : np):
-        if np.abs(np.linalg.det(Ja_v)) < 7e-29: 
+        # print(np.abs(np.linalg.det(Ja_v)))
+        if np.abs(np.linalg.det(Ja_v)) < 1e-5: 
             status = True
         else: status = False
         return status
     
     def _calcAngleYZ(self, x0, y0, z0):
         theta = 0
-        if z0 == 0: theta, False
+        if z0 == 0: return theta, False
         y1 = -0.5 * 0.57735 * self.f # f/2 * tg 30
         y0 -= 0.5 * 0.57735 * self.e    # shift center to edge
         # z = a + b*y

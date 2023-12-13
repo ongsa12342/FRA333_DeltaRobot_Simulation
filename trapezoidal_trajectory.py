@@ -18,21 +18,20 @@ class TRAPEZOIDAL:
         self.time_max = calcTimeMax(qi,qf, self.velocity_max,self.acceleration_max)
         self.velocity_Constraint = calcallVelocityConstraint(qi,qf,self.acceleration_max,self.time_max)
     def traject_gen(self, current_time):
-        current_time1, positionJ1, velocityJ1, accelerationJ1 = trajectory_trapezoidal(self.qi[0][0], self.qf[0][0], self.velocity_Constraint[0][0], self.acceleration_max, self.dt, current_time, self.time_max)
-        current_time2, positionJ2, velocityJ2, accelerationJ2 = trajectory_trapezoidal(self.qi[1][0], self.qf[1][0], self.velocity_Constraint[1][0], self.acceleration_max, self.dt, current_time, self.time_max)
-        current_time3, positionJ3, velocityJ3, accelerationJ3 = trajectory_trapezoidal(self.qi[2][0], self.qf[2][0], self.velocity_Constraint[2][0], self.acceleration_max, self.dt, current_time, self.time_max)
+        positionJ1, velocityJ1, accelerationJ1 = trajectory_trapezoidal(self.qi[0][0], self.qf[0][0], self.velocity_Constraint[0][0], self.acceleration_max, current_time)
+        positionJ2, velocityJ2, accelerationJ2 = trajectory_trapezoidal(self.qi[1][0], self.qf[1][0], self.velocity_Constraint[1][0], self.acceleration_max, current_time)
+        positionJ3, velocityJ3, accelerationJ3 = trajectory_trapezoidal(self.qi[2][0], self.qf[2][0], self.velocity_Constraint[2][0], self.acceleration_max, current_time)
 
         q_traj = np.array([[positionJ1],[positionJ2],[positionJ3]])
         v_traj = np.array([[velocityJ1],[velocityJ2],[velocityJ3]])
         a_traj = np.array([[accelerationJ1],[accelerationJ2],[accelerationJ3]])
-        current_time = np.array([[current_time1],[current_time2],[current_time3]])
-        return q_traj,  v_traj, a_traj, current_time
+        return q_traj,  v_traj, a_traj
 
 
 
 
 
-def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, dt, current_time, end_time):
+def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, current_time):
     # Check for division by zero
     if max_accelJ == 0:
         raise ValueError("max_accelJ must be non-zero.")
@@ -75,7 +74,7 @@ def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, dt,
         )
         acceleration = 0
         # print(current_time, position, velocity, acceleration)
-    elif time_total - time_accel <= current_time < end_time:
+    elif time_total - time_accel <= current_time < time_total:
         # Deceleration phase
         # print("Deceleration phase")
         decel_time = current_time - (time_total - time_accel)
@@ -88,12 +87,12 @@ def trajectory_trapezoidal(initial_posJ, target_posJ, max_veloJ, max_accelJ, dt,
                 + max_veloJ * decel_time)
         )
         acceleration = -max_accelJ * direction
-    if current_time >= end_time:
+    if current_time >= time_total:
         position = target_posJ
         velocity = 0.0
         acceleration = 0.0
     
-    return current_time, position, velocity, acceleration
+    return position, velocity, acceleration
     
 
 # Visualize the trajectory
@@ -179,3 +178,9 @@ def calcallVelocityConstraint(qi,qf,accel_max,time_max):
 
 
 
+
+
+# max_accelJ = 1
+# time_max = 0.6456360795584286
+# veloCompute = ((max_accelJ * time_max) - np.sqrt((max_accelJ * time_max)**2 - 4 * np.abs(0.1042114868068944) * max_accelJ))/2
+# print(veloCompute)

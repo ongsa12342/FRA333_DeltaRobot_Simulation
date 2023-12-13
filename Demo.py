@@ -102,7 +102,6 @@ T = np.array([0, 0, 0]).reshape(3,1)
 dt = 1/1000
 Kp_v = 50
 Kp_p = 300
-sum_e = 0
 
 # Trajectory
 angular_velocity_max = 1000 * np.pi / 180 # rad/s
@@ -166,10 +165,11 @@ wtext(text='\n')
 
 wlog = wtext(text='', color=color.red)
 error_status = None
+
 while True:
     # Frame rate set
-    rate(1/dt)
-
+    sleep(dt)
+    # sleep(0.6)
     # update user input
     x_des , y_des ,z_des = desBox.getText()
     des_pos = np.array([x_des , y_des ,z_des]).reshape(3,1)/1000
@@ -181,7 +181,7 @@ while True:
     rf1_p, rf2_p, rf3_p, p, _ = delta.forward_pose_kinematic(q)
 
     # update pose
-    wt.text = f'Positions = ({p[0][0]*1000:.2f}, {p[1][0]*1000:.2f}, {p[2][0]*1000:.2f})     Angle = ({np.rad2deg(q[0][0]):.2f}, {np.rad2deg(q[1][0]):.2f}, {np.rad2deg(q[2][0]):.2f})     Tourqe = ({T[0][0]*1000:.2f}, {T[1][0]*1000:.2f}, {T[2][0]*1000:.2f})'
+    wt.text = f'Positions = ({p[0][0]*1000:.2f}, {p[1][0]*1000:.2f}, {p[2][0]*1000:.2f})     Angle = ({np.rad2deg(q[0][0]):.2f}, {np.rad2deg(q[1][0]):.2f}, {np.rad2deg(q[2][0]):.2f})     Tourqe = ({T[0][0]:.2f}, {T[1][0]:.2f}, {T[2][0]:.2f})'
 
     
     rf.update_positions(rf1_p.reshape(3,)*1000,
@@ -203,7 +203,6 @@ while True:
         trail.clear_trail()
         sleep(0.05)
 
-
         _q , error_status = delta.inverse_pose_kinematic(des_pos)
 
         if error_status == None:
@@ -222,11 +221,11 @@ while True:
                 #Path move J Check
                 for c_time in np.arange(0,moveJ.time_max+dt,dt):
 
-                    q_traj, qd_traj, *_ = moveJ.traject_gen(c_time)
+                    q_traj, qd_traj, _ = moveJ.traject_gen(c_time)
                     
                     #find pos of move
                     *_, pos_traj, _ = delta.forward_pose_kinematic(q_traj)
-
+                    sleep(dt/2)
                     #trail update
                     trail.pos = vector(pos_traj[0][0]*1000,
                                        pos_traj[1][0]*1000,
@@ -236,12 +235,10 @@ while True:
                 #Path move L Check
                 for c_time in np.arange(0,moveL.time_max+dt,dt):
 
-                    pos_traj, velo_traj, *_ = moveL.traject_gen(c_time)
+                    pos_traj, velo_traj, _ = moveL.traject_gen(c_time)
 
                     q_traj, error_status = delta.inverse_pose_kinematic(pos_traj)
-
-
-                    *_, p, status = delta.forward_pose_kinematic(q_traj)
+                    
                     
                     
                     if not error_status == None :
@@ -285,12 +282,14 @@ while True:
         
         # trajectory gen
         if mode == "MoveJ":
-            q_traj, qd_traj, _, _ = moveJ.traject_gen(current_time)
+            q_traj, qd_traj, _ = moveJ.traject_gen(current_time)
         else:
-            pos_traj ,  velo_traj, _, _ = moveL.traject_gen(current_time)
-            q_traj,  _ = delta.inverse_pose_kinematic(pos_traj)
-            qd_traj, _ = delta.inverse_twist_kinematic(velo_traj, q_traj)
-
+            pos_traj ,  velo_traj, _ = moveL.traject_gen(current_time)
+            q_traj,  status_check = delta.inverse_pose_kinematic(pos_traj)
+            if status_check != None: print("IPK",status_check)
+            qd_traj, status_check = delta.inverse_twist_kinematic(velo_traj, q_traj)
+            if status_check != None: print("ITK",status_check)
+            zero = np.zeros(shape=(3, 1))
 
 
         position_error = q_traj - q
@@ -300,6 +299,11 @@ while True:
 
         T = Kp_v * velocity_error
 
+        for i in range(3):
+            if T[i] > 10:
+                T[i] = 10
+            elif T[i] < -10:
+                T[i] = -10
 
         # update
         current_time = current_time + dt
@@ -318,6 +322,7 @@ while True:
         desBox.button.background = color.white
         desBox.button.text = "Enter"
         control_enable = False
+        
         
 
 
