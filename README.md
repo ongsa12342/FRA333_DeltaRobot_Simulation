@@ -267,19 +267,30 @@ Equation of Motion
 
  ## Validation
  
- Forward Kinematic
+ Inverse Kinematic and  Forward Kinematic
  
- Inverse Kinematic
- 
+
+https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/5ab022ce-6ecc-4e04-9910-96cd4321b81e
+
+
  Dynamic
  
- Cascade Control
+
+https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/75a574b3-d1c2-4714-ad9f-cfb62f2ac0d4
  
  Trajectory
  
  - MoveJ
- 
+
+https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/94a7669d-ae1b-4684-9f93-b902732700bc
+
  - MoveP
+
+https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/73b66a13-a14d-451b-a064-d7e4da43a935
+
+ Cascade Control
+
+https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/771eef7c-0c2f-44c6-81ae-ae456e43e6c9
 
 ## Acknowledgements
 This project is part of the coursework for FRA333 Robot Kinematics at the Institute of Field Robotics, King Mongkut’s University of Technology Thonburi. Special thanks to the course instructors for their guidance and support.
