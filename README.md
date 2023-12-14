@@ -112,7 +112,7 @@ run demo.py
 
     - Max Linear Acceleration = 100 m/s^2
 
-## Medtodology
+## Medthodology
 
 ### Forward Kinematics
 
@@ -126,19 +126,19 @@ run demo.py
 
  &emsp;&emsp;&emsp;
 
- &emsp;&emsp;&emsp; $J'_{1}:\ \left(x_{1},\ y_{1},\ z_{1}\right)\ =\ \left(0;\ -\frac{\left(f-e\right)}{2\cdot\sqrt{3}}-\ r_{f}\cdot\cos\left(\theta_{1}\right);\ -\ r_{f}\cdot\sin\left(\theta_{1}\right)\ \right)$
+ &emsp;&emsp;&emsp; $J'_1: (x_1, y_1, z_1) = \left(0, -\frac{{f - e}}{{2\sqrt{3}}} - r_f \cos(\theta_1), -r_f \sin(\theta_1)\right)\$
 
-  &emsp;&emsp;&emsp; $J'_{2}:\ \left(x_{2},\ y_{2},\ z_{2}\right)\ =\ \left(\left[\frac{\left(f-e\right)}{2\cdot\sqrt{3}}+\ r_{f}\cdot\cos\left(\theta_{2}\right)\right]\cdot\cos\left(30\right);\ \left[\frac{\left(f-e\right)}{2\cdot\sqrt{3}}-\ r_{f}\cdot\cos\left(\theta_{2}\right)\right]\cdot\sin\left(30\right);\ -\ r_{f}\cdot\sin\left(\theta_{2}\right)\ \right)$
+  &emsp;&emsp;&emsp; $J'_2: (x_2, y_2, z_2) = \left(\left[\frac{{f - e}}{{2\sqrt{3}}} + r_f \cos(\theta_2)\right] \cos(30^\circ), \left[\frac{{f - e}}{{2\sqrt{3}}} - r_f \cos(\theta_2)\right] \sin(30^\circ), -r_f \sin(\theta_2)\right)\$
 
-  &emsp;&emsp;&emsp;$J'_{3}:\ \left(x_{3},\ y_{3},\ z_{3}\right)\ =\ \left(\left[\frac{\left(f-e\right)}{2\cdot\sqrt{3}}+\ r_{f}\cdot\cos\left(\theta_{3}\right)\right]\cdot\cos\left(30\right);\ \left[\frac{\left(f-e\right)}{2\cdot\sqrt{3}}-\ r_{f}\cdot\cos\left(\theta_{3}\right)\right]\cdot\sin\left(30\right);\ -\ r_{f}\cdot\sin\left(\theta_{3}\right)\ \right)$
+  &emsp;&emsp;&emsp; $J'_3: (x_3, y_3, z_3) = \left(\left[\frac{{f - e}}{{2\sqrt{3}}} + r_f \cos(\theta_3)\right] \cos(30^\circ), \left[\frac{{f - e}}{{2\sqrt{3}}} - r_f \cos(\theta_3)\right] \sin(30^\circ), -r_f \sin(\theta_3)\right)\$
 
   Equation of three spheres
 
   &emsp;&emsp;&emsp; $x^{2}\ +\ \left(y-y_{1}\right)^{2}\ +\ \left(z-z_{1}\right)^{2}\ =\ r_{e}^{2}$
 
-  &emsp;&emsp;&emsp;$\left(x-x_{2}^{ }\right)^{2}\ +\ \left(y-y_{2}\right)^{2}\ +\ \left(z-z_{2}\right)^{2}\ =\ r_{e}^{2}$
+  &emsp;&emsp;&emsp; $\left(x-x_{2}^{ }\right)^{2}\ +\ \left(y-y_{2}\right)^{2}\ +\ \left(z-z_{2}\right)^{2}\ =\ r_{e}^{2}$
 
-  &emsp;&emsp;&emsp;$\left(x-x_{3}^{ }\right)^{2}\ +\ \left(y-y_{3}\right)^{2}\ +\ \left(z-z_{3}\right)^{2}\ =\ r_{e}^{2}$
+  &emsp;&emsp;&emsp; $\left(x-x_{3}^{ }\right)^{2}\ +\ \left(y-y_{3}\right)^{2}\ +\ \left(z-z_{3}\right)^{2}\ =\ r_{e}^{2}$
 
   &emsp;&emsp;&emsp; $w_{i}\ =\ x_{1}^{2}+y_{i}^{2}+z_{i}^{2};\ i=1,2,3$
 
@@ -208,9 +208,9 @@ where:
 &emsp;&emsp;&emsp; $J{ix}=-sin\theta_{3i}cos(\theta_{2i}+\theta_{1i})sin\phi_{i}+cos\theta_{3i}cos\phi_{i}$ 
 
 
-&emsp;&emsp;&emsp;$J{iy}= sin\theta_{3i}cos(\theta_{2i}+\theta_{1i})cos\phi_{i}+cos\theta_{3i}sin\phi_{i}$
+&emsp;&emsp;&emsp; $J{iy}= sin\theta_{3i}cos(\theta_{2i}+\theta_{1i})cos\phi_{i}+cos\theta_{3i}sin\phi_{i}$
 
-&emsp;&emsp;&emsp;$J{iz}=-sin\theta_{3i}sin(\theta_{2i}+\theta_{1i})$
+&emsp;&emsp;&emsp; $J{iz}=-sin\theta_{3i}sin(\theta_{2i}+\theta_{1i})$
 
 angular velocity
 
