@@ -1,4 +1,3 @@
-=======
 # Delta Robot Simulation
 This repository contains a dynamic simulation of a Delta Robot. The simulation is designed to model the motion and behavior of a Delta Robot in a dynamic environment.
 
@@ -312,4 +311,4 @@ Dynamic
 - https://ieeexplore.ieee.org/abstract/document/8015814/authors#authors
 
 - https://www.sciencedirect.com/science/article/pii/S0957415822000095
->>>>>>> ccbbce0ca3493fa04f82f4ac59a3ec8b3b1004b8
+
