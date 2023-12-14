@@ -116,7 +116,11 @@ run demo.py
 
 ### Forward Kinematics
 
+<img width="562" alt="delta_robor_simulation" src="https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/113016544/cfcc90b5-09e2-4d52-a04b-6e3302a98ccb">
+
  Find Coordinates of points J'1, J'2, J'3
+
+ <img width="362" alt="delta_robor_simulation" src="https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/113016544/fc62a7d0-a75e-4360-a651-f885f6a79cd5">
 
  &emsp;&emsp;&emsp; $OF_{1}\ =\ OF_{2}\ =\ OF_{3}\ =\frac{f\cdot\tan\left(30\right)}{2}\ =\ \frac{f}{2\cdot\sqrt{3}}$
 
@@ -167,30 +171,33 @@ run demo.py
 
 ### Inverse Kinematic
 
+<img width="562" alt="delta_robor_simulation" src="https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/113016544/fe15f623-1c6f-4cdf-b5b6-c6eed5383805">
 
- &emsp;&emsp;&emsp; $E\left(x{0},y{0},z{0}\right)$
+ &emsp;&emsp;&emsp; $E\left(x_{0},y_{0},z_{0}\right)$
 
- &emsp;&emsp;&emsp; $EE{1}=\frac{e}{2}\tan\left(30\right)=\frac{e}{2\sqrt{3}}$
+ &emsp;&emsp;&emsp; $EE_{1}=\frac{e}{2}\tan\left(30\right)=\frac{e}{2\sqrt{3}}$
 
- &emsp;&emsp;&emsp; $E{1}\left(x{0},y{0}-\frac{e}{2\sqrt{3},z{0}}\right)$
+ &emsp;&emsp;&emsp; $E_{1}\left(x_{0},y_{0}-\frac{e}{2\sqrt{3},z_{0}}\right)$
 
- &emsp;&emsp;&emsp; $E{1}\left(0,\frac{y{0}e}{2\sqrt{3}},z{0}\right)$
+ &emsp;&emsp;&emsp; $E_{1}\left(0,\frac{y_{0}e}{2\sqrt{3}},z_{0}\right)$
 
- &emsp;&emsp;&emsp; $E{1}E{1}'=x{0}$
+ &emsp;&emsp;&emsp; $E_{1}E_{1}'=x_{0}$
 
- &emsp;&emsp;&emsp; $E{1}'J{1}=\sqrt{E{1}J{1}^{\ 2}-E{1}E{1}'^{2}}=\sqrt{r{e}^{2}-x{0}^{2}}$
+ &emsp;&emsp;&emsp; $E_{1}'J_{1}=\sqrt{E_{1}J_{1}^{\ 2}-E_{1}E_{1}'^{2}}=\sqrt{r_{e}^{2}-x_{0}^{2}}$
 
- &emsp;&emsp;&emsp; $F{1}\left(0,-\frac{f}{2\sqrt{3}},0\right)$
+ &emsp;&emsp;&emsp; $F_{1}\left(0,-\frac{f}{2\sqrt{3}},0\right)$
 
- &emsp;&emsp;&emsp; $\left(y{J1}-y{F1}\right)^{2}+\left(z{J1}-z{F1}\right)^{2}=r{f}^{2}$
+ &emsp;&emsp;&emsp; $\left(y_{J1}-y_{F1}\right)^{2}+\left(z_{J1}-z_{F1}\right)^{2}=r_{f}^{2}$
 
- &emsp;&emsp;&emsp; $\left(y{J1}-y{F1}\right)^{2}+\left(z{J1}-z{F'1}\right)^{2}=r{e}^{2}-x{0}^{2}$
+ &emsp;&emsp;&emsp; $\left(y_{J1}-y_{F1}\right)^{2}+\left(z_{J1}-z_{F'1}\right)^{2}=r_{e}^{2}-x_{0}^{2}$
 
- &emsp;&emsp;&emsp; $\left(y{J1}+\frac{f}{2\sqrt{3}}\right)^{2}+z{J1}^{2}=r{f}^{2}$
+ &emsp;&emsp;&emsp; $\left(y_{J1}+\frac{f}{2\sqrt{3}}\right)^{2}+z_{J1}^{2}=r_{f}^{2}$
 
- &emsp;&emsp;&emsp; $\left(y{J1}-y{0}+\frac{e}{2\sqrt{3}}\right)^{2}+\left(z{J1}-z{0}\right)^{2}=r{e}^{2}-x{0}^{2}$
+ &emsp;&emsp;&emsp; $\left(y_{J1}-y_{0}+\frac{e}{2\sqrt{3}}\right)^{2}+\left(z_{J1}-z_{0}\right)^{2}=r_{e}^{2}-x_{0}^{2}$
 
- &emsp;&emsp;&emsp; $J{1}\left(0,\ y{J1},\ z{J1}\right)$
+ &emsp;&emsp;&emsp; $J_{1}\left(0,\ y_{J1},\ z_{J1}\right)$
+
+ &emsp;&emsp;&emsp; $\theta_{1}\ =\ \arctan\left(\frac{z_{J1}}{y_{F1}+y_{J1}}\right)$
 
 
 ### Jacobian Matrix
@@ -256,6 +263,22 @@ Euler-Lagrange equation
 Equation of Motion
 
  &emsp;&emsp;&emsp; $I\left(q\right)\cdot\ddot{\theta}\ +\ G\left(q\right)\ +B\cdot q =\ T$
+
+ ## Validation
+ 
+ Forward Kinematic
+ 
+ Inverse Kinematic
+ 
+ Dynamic
+ 
+ Cascade Control
+ 
+ Trajectory
+ 
+ - MoveJ
+ 
+ - MoveP
 
 ## Acknowledgements
 This project is part of the coursework for FRA333 Robot Kinematics at the Institute of Field Robotics, King Mongkut’s University of Technology Thonburi. Special thanks to the course instructors for their guidance and support.
