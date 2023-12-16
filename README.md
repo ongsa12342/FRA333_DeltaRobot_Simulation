@@ -283,7 +283,7 @@ https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/75a57
 
 https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/94a7669d-ae1b-4684-9f93-b902732700bc
 
- - MoveP
+ - MoveL
 
 https://github.com/ongsa12342/FRA333_DeltaRobot_Simulation/assets/61608951/73b66a13-a14d-451b-a064-d7e4da43a935
 
